@@ -107,37 +107,10 @@
   box-sizing: border-box;
 }
 
-.main-title {
-  font-size: 2rem;
-  flex-grow: .2;
-}
-
 .room-page > div {
   width: 100%;
   display: flex;
   justify-content: space-between;
-}
-
-.color-button {
-  border: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-}
-
-.color-button:focus,
-.color-button:active {
-  outline: none;
-}
-
-.color-button:hover {
-  background-color: white;
-  border: 1px solid black;
-}
-
-.color-button:active {
-  width: 30px;
-  height: 30px;
 }
 
 .size-value {
