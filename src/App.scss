@@ -140,11 +140,12 @@
   text-align: center;
 }
 
-.canvas-contain{
+.canvas-container {
   position:relative;
   border: solid 2px black;
   width:950px;
   height:500px;
+  background-color: #ffffff;
 }
 
 #canvas {

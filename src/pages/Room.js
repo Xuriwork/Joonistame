@@ -2,6 +2,8 @@ import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import io from 'socket.io-client';
 
+import PainterTools from '../components/PainterTools';
+
 const socketURL = 'http://localhost:5000';
 
 class Draw extends Component{
@@ -24,13 +26,10 @@ class Draw extends Component{
         }
     }
 
-    componentWillMount() {
-		const { authorized, history } = this.props;
-		if (!authorized) return history.push('/join');
-    };
-    
     componentDidMount() {
-        if (!this.props.authorized) return;
+        const { authorized, history } = this.props;
+        if (!authorized) return history.push('/join');
+        
         this.setUpCanvas();
         const socket = io(socketURL);
         this.setState({ socket });
@@ -56,10 +55,13 @@ class Draw extends Component{
     };
 
     onSocketMethods = (socket) => {
+        
         console.log('Test');
         console.log('id', socket);
 
         const { roomName, username } = this.props;
+        const { context, width, height } = this.state;
+
         console.log(this.props);
         
         socket.on('connect', () => {
@@ -88,7 +90,7 @@ class Draw extends Component{
         });
 
         socket.on('ERASE_CANVAS', () => {
-            this.state.context.clearRect(0, 0, this.state.width, this.state.height)
+            context.clearRect(0, 0, width, height)
         });
 
         socket.on('RESIZED', (board)=>{
@@ -106,10 +108,6 @@ class Draw extends Component{
         window.addEventListener('resize', () => {
             console.log('Resizing');
         }, false)        
-    }
-
-    selectColor = (brushColor) => {
-        this.setState({ brushColor });
     };
     
     startDraw = () => {
@@ -155,23 +153,27 @@ class Draw extends Component{
         newcontext.lineWidth = brushSize;
 
         this.setState({context:newcontext}, () => {
-            this.state.context.beginPath();        
-            this.state.context.moveTo(x1, y1);
-            this.state.context.lineTo(x2, y2);    
-            this.state.context.stroke();
-            this.state.context.closePath();
+            const { context } = this.state;
+            context.beginPath();        
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);    
+            context.stroke();
+            context.closePath();
         });
     };
 
-    eraseBoard = () => {
+    handleEraseBoard = () => {
         this.state.socket.emit('ERASE_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
-        // this.setState({context:this.state.context.clearRect(0, 0, this.state.width, this.state.height) });
     };
 
     handleOnChangeBrushSize = (e) =>{
         const value = e.target.value;
         this.setState({ brushSize: value });
+    };
+
+    handleChangeColor = (brushColor) => {
+        this.setState({ brushColor });
     };
 
     setMessages = (data) => {
@@ -202,15 +204,14 @@ class Draw extends Component{
             <div className='room-page'>
                 <div className='canvas-row'>
                     <div className='tool-box'>
-                        <button onClick={this.eraseBoard}>Erase Canvas</button>
-                        <div className='size-contain'>
-                            <h3>Brush Size</h3>
-                            <div className='size-value'>{brushSize}</div>
-                            <input className='brush-size' type='range' min={1} max={5} value={brushSize} onChange={this.handleOnChangeBrushSize} />
-                        </div>
+                        <PainterTools 
+                            handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
+                            brushSize={brushSize} 
+                            handleEraseBoard={this.handleEraseBoard}
+                        />
                     </div>
-                    <div className='canvas-contain' ref={(node)=>{this.canvasContain = node}}>
-                        <canvas id='canvas' ref={(node)=>{this.canvas = node}} 
+                    <div className='canvas-container' ref={(node) => { this.canvasContain = node }}>
+                        <canvas id='canvas' ref={(node) => { this.canvas = node }} 
                             onMouseDown={this.startDraw} onMouseUp={this.endDraw} 
                             onMouseMove={this.drawing} onMouseOut={this.endDraw}
                         />
