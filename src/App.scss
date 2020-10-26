@@ -120,19 +120,34 @@
 
 .drawer-tools-container {
   background-color: #374069;
-  height: 200px;
+  height: 250px;
   padding: 5px;
   box-sizing: border-box;
 
-    .brush-size-input {
+  .buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    
+    
+    button {
+      width: 40px;
+      height: 40px;
+      background-color: #3cefff;
+      border-radius: 2px;
+
+      .selected {
+    
+      }
+    }
+  }
+
+    .pencil-size-input {
       -webkit-appearance: none;
       width: 80%;
       height: 100%;
       background: transparent;
-    
-      &:focus {
-        outline: none;
-      }
     
       //WEBKIT
       &::-webkit-slider-thumb {
@@ -158,19 +173,13 @@
         cursor: pointer;
       }
     
-      &:hover::-webkit-slider-runnable-track {
-        background: #ff6e40;
-      }
-    
       // IE
     
       &::-ms-track {
         width: 60%;
         cursor: pointer;
         height: 9px;
-    
         transition: all 0.5s;
-        /* Hides the slider so custom styles can be added */
         background: transparent;
         border-color: transparent;
         color: transparent;
@@ -191,16 +200,12 @@
         background: #bdbdbd;
         border-radius: 3rem;
       }
-      &:focus::-ms-fill-lower {
-        background: #ff6e40;
-      }
+
       &::-ms-fill-upper {
         background: #bdbdbd;
         border-radius: 3rem;
       }
-      &:focus::-ms-fill-upper {
-        background: #ff6e40;
-      }
+
     
       //FIREFOX
       &::-moz-range-thumb {
@@ -222,9 +227,6 @@
     
         transition: all 0.5s;
         cursor: pointer;
-      }
-      &:hover::-moz-range-track {
-        background: #ff6e40;
       }
     }
   
@@ -265,7 +267,7 @@
     margin: 0;
     padding: 0;
     display: block;
-    cursor: url("./assets/icons/brush-fill.svg") 0 20, default;
+    cursor: url("./assets/icons/pencil-fill.svg") 0 20, default;
   }
 }
 

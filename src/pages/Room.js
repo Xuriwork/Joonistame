@@ -20,8 +20,8 @@ class Draw extends Component{
             context: null,
             width: null, 
             height: null,
-            brushSize: 1,
-            brushColor: '#000000', 
+            pencilSize: 1,
+            pencilColor: '#000000', 
             x: null, 
             y: null, 
             prevX: null, 
@@ -88,12 +88,12 @@ class Draw extends Component{
         socket.on('GET_CANVAS', (canvas) => {
             console.log('Canvas', canvas);
             for(let i = 0; i < canvas.length; i++){
-                this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].brushColor, canvas[i].brushSize);
+                this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].pencilColor, canvas[i].pencilSize);
             };
         });
 
         socket.on('DRAW', (data) => {
-            this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.brushColor, data.brushSize);
+            this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
         socket.on('ERASE_CANVAS', () => {
@@ -102,7 +102,7 @@ class Draw extends Component{
 
         socket.on('RESIZED', (board)=>{
             for(let i = 0; i < board.length; i++){
-                this.handleDrawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].brushColor, board[i].brushSize);
+                this.handleDrawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].pencilColor, board[i].pencilSize);
             }
         });
 
@@ -123,7 +123,7 @@ class Draw extends Component{
     };
 
     drawing = (e) => {
-        const { drawing, prevX, prevY, brushColor, brushSize, socket } = this.state;
+        const { drawing, prevX, prevY, pencilColor, pencilSize, socket } = this.state;
 
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -134,7 +134,7 @@ class Draw extends Component{
         if (drawing) {
             console.log('Drawing', x, y);
 
-            this.handleDrawLine(prevX, prevY, x, y, brushColor, brushSize);
+            this.handleDrawLine(prevX, prevY, x, y, pencilColor, pencilSize);
             this.setState({ prevX: x, prevY: y });
 
             socket.emit('DRAW', {
@@ -142,8 +142,8 @@ class Draw extends Component{
 				'y1': prevY,
 				'x2': x,
                 'y2': y,
-                brushColor,
-                brushSize,
+                pencilColor,
+                pencilSize,
             });
         };
     };
@@ -153,11 +153,11 @@ class Draw extends Component{
         this.setState({ drawing: false });
     };
 
-    handleDrawLine = (x1, y1, x2, y2, brushColor, brushSize) => {
+    handleDrawLine = (x1, y1, x2, y2, pencilColor, pencilSize) => {
         let newcontext = this.state.context;
 
-        newcontext.strokeStyle = brushColor;
-        newcontext.lineWidth = brushSize;
+        newcontext.strokeStyle = pencilColor;
+        newcontext.lineWidth = pencilSize;
 
         this.setState({context:newcontext}, () => {
             const { context } = this.state;
@@ -169,18 +169,18 @@ class Draw extends Component{
         });
     };
 
-    handleEraseBoard = () => {
+    handleEraseCanvas = () => {
         this.state.socket.emit('ERASE_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
     };
 
-    handleOnChangeBrushSize = (e) =>{
+    handleOnChangePencilSize = (e) =>{
         const value = e.target.value;
-        this.setState({ brushSize: value });
+        this.setState({ pencilSize: value });
     };
 
-    handleChangeColor = (brushColor) => {
-        this.setState({ brushColor });
+    handleChangeColor = (pencilColor) => {
+        this.setState({ pencilColor });
     };
 
     setMessages = (data) => {
@@ -205,7 +205,7 @@ class Draw extends Component{
 	};
 
     render(){
-        const { users, brushSize, messages } = this.state;
+        const { users, pencilSize, messages } = this.state;
 
         return(
             <div className='room-page'>
@@ -220,9 +220,9 @@ class Draw extends Component{
                     />
                     <div className='sidebar_second'>
                         <DrawerTools 
-                            handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
-                            brushSize={brushSize} 
-                            handleEraseBoard={this.handleEraseBoard}
+                            handleOnChangePencilSize={this.handleOnChangePencilSize} 
+                            pencilSize={pencilSize} 
+                            handleEraseCanvas={this.handleEraseCanvas}
                         />
                         <Chat messages={messages} />
                     </div>

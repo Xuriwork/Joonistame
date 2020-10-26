@@ -11,9 +11,9 @@ const colors = [
     '#6E3B3B',
 ];
 
-const ColorPalette = ({ setBrushColor }) => {
+const ColorPalette = ({ setPencilColor }) => {
 
-	const changeColor = (selectedColor) => setBrushColor(selectedColor);
+	const changeColor = (selectedColor) => setPencilColor(selectedColor);
 	
 	return (
 		<div className='color-palette'>
