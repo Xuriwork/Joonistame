@@ -22,6 +22,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 io.on('connection', (socket) => {
 
   socket.on('JOIN', ({ username, roomName }) => {
+    socket.leaveAll();
+
+    if (username.trim() === '') return;
+    if (roomName.trim() === '') return;
+
     console.log('New user connected', username, socket.id);
 
     roomName = roomName.trim();
