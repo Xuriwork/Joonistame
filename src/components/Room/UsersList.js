@@ -1,6 +1,6 @@
 const UsersList = ({ users }) => {
     return (
-        <div>
+        <div className='users-list-container'>
             <h3>Users</h3>
             <div>
                 {users.map((user) => <div key={user.id}>{user.name}</div> )}

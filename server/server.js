@@ -27,6 +27,8 @@ io.on('connection', (socket) => {
     roomName = roomName.trim();
     username = username.trim();
 
+    if (!roomName || !username) return;
+
     addUser({ id: socket.id, username, roomName });
 
     const users = getAllUsersInRoom(roomName);
@@ -35,7 +37,8 @@ io.on('connection', (socket) => {
     const roomId = shortid.generate();
     if (!room) {
       addRoom({ name: roomName, drawer: users[0].id, roomId });
-      addCanvas({ roomId })
+      addCanvas({ roomId });
+      console.log('Added');
     };
 
     const { drawer } = getRoomByName(roomName);

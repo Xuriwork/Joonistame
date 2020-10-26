@@ -1,8 +1,10 @@
 import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import io from 'socket.io-client';
+import Chat from '../components/Chat';
+import Canvas from '../components/Room/Canvas';
 
-import PainterTools from '../components/Room/PainterTools/PainterTools';
+import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
 
 const socketURL = 'http://localhost:5000';
@@ -32,9 +34,6 @@ class Draw extends Component{
         if (!authorized) return history.push('/join');
         
         this.setUpCanvas();
-        const socket = io(socketURL);
-        this.setState({ socket });
-        this.onSocketMethods(socket);
     };
     
     componentWillUnmount() {  
@@ -47,12 +46,19 @@ class Draw extends Component{
     setUpCanvas = () => {
         // let width = window.innerWidth;
         // let height = window.innerHeight;
-        console.log('Parent size', this.canvasContain.offsetWidth, this.canvasContain.offsetHeight);
-        let width = this.canvasContain.offsetWidth;
-        let height = this.canvasContain.offsetHeight;
+        console.log('Parent size', this.canvasContainer.offsetWidth, this.canvasContainer.offsetHeight);
+        let width = this.canvasContainer.offsetWidth;
+        let height = this.canvasContainer.offsetHeight;
         this.setState({ context:this.canvas.getContext('2d'), width, height })
         this.canvas.width = width;
         this.canvas.height = height;
+        this.connect();
+    };
+
+    connect = () => {
+        const socket = io(socketURL);
+        this.setState({ socket });
+        this.onSocketMethods(socket);
     };
 
     onSocketMethods = (socket) => {
@@ -199,23 +205,27 @@ class Draw extends Component{
 	};
 
     render(){
-        const { users, brushSize } = this.state;
+        const { users, brushSize, messages } = this.state;
 
         return(
             <div className='room-page'>
-                <div className='canvas-row'>
-                    <PainterTools 
-                        handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
-                        brushSize={brushSize} 
-                        handleEraseBoard={this.handleEraseBoard}
-                    />
-                    <div className='canvas-container' ref={(node) => { this.canvasContain = node }}>
-                        <canvas ref={(node) => { this.canvas = node }} 
-                            onMouseDown={this.handleStartDrawing} onMouseUp={this.handleEndDrawing} 
-                            onMouseMove={this.drawing} onMouseOut={this.handleEndDrawing}
-                        />
-                    </div>
+                <div>
                     <UsersList users={users} />
+                    <Canvas 
+                        handleStartDrawing={this.handleStartDrawing} 
+                        handleEndDrawing={this.handleEndDrawing} 
+                        drawing={this.drawing}
+                        canvas={(node) => { this.canvas = node }}
+                        canvasContainer={(node) => { this.canvasContainer = node }}
+                    />
+                    <div className='sidebar_second'>
+                        <DrawerTools 
+                            handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
+                            brushSize={brushSize} 
+                            handleEraseBoard={this.handleEraseBoard}
+                        />
+                        <Chat messages={messages} />
+                    </div>
                 </div>
             </div>
         )
