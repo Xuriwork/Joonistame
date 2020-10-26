@@ -210,12 +210,12 @@ class Draw extends Component{
                         handleEraseBoard={this.handleEraseBoard}
                     />
                     <div className='canvas-container' ref={(node) => { this.canvasContain = node }}>
-                        <canvas id='canvas' ref={(node) => { this.canvas = node }} 
+                        <canvas ref={(node) => { this.canvas = node }} 
                             onMouseDown={this.handleStartDrawing} onMouseUp={this.handleEndDrawing} 
                             onMouseMove={this.drawing} onMouseOut={this.handleEndDrawing}
                         />
                     </div>
-                    <UsersList />
+                    <UsersList users={users} />
                 </div>
             </div>
         )
