@@ -91,11 +91,6 @@ class Draw extends Component{
             this.state.context.clearRect(0, 0, this.state.width, this.state.height)
         });
 
-        socket.on('user left', (data) =>{
-            console.log('User left', data);
-            this.setState({users:data});
-        })
-
         socket.on('RESIZED', (board)=>{
             for(let i = 0; i < board.length; i++){
                 this.drawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].brushColor, board[i].brushSize);
@@ -103,8 +98,12 @@ class Draw extends Component{
         });
 
         socket.on('MESSAGE', (data) => this.setMessages(data));
+
+        socket.on('USER_LEFT', (users) =>{
+            this.setState({ users });
+        });
         
-        window.addEventListener('resize', ()=>{
+        window.addEventListener('resize', () => {
             console.log('Resizing');
         }, false)        
     }
@@ -113,36 +112,41 @@ class Draw extends Component{
         this.setState({ brushColor });
     };
     
-    startDraw = (e) => {
+    startDraw = () => {
         console.log('Started Drawing');
-        this.setState({ drawing:true, prevX: this.state.x, prevY: this.state.y });
+        this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
 
     drawing = (e) => {
-        let rect = this.canvas.getBoundingClientRect();
-        let x=e.clientX - rect.left;
-        let y=e.clientY - rect.top;
-        this.setState({ x, y});
-        if(this.state.drawing){
+        const { drawing, prevX, prevY, brushColor, brushSize, socket } = this.state;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        this.setState({ x, y });
+
+        if (drawing) {
             console.log('Drawing', x, y);
-            this.drawLine(this.state.prevX, this.state.prevY, x, y, this.state.brushColor, this.state.brushSize);
-            this.setState({prevX:x, prevY:y});
-            this.state.socket.emit('DRAW', {
-                'x1': this.state.prevX,
-				'y1': this.state.prevY,
+
+            this.drawLine(prevX, prevY, x, y, brushColor, brushSize);
+            this.setState({ prevX: x, prevY: y });
+
+            socket.emit('DRAW', {
+                'x1': prevX,
+				'y1': prevY,
 				'x2': x,
                 'y2': y,
-                brushColor: this.state.brushColor,
-                brushSize: this.state.brushSize
+                brushColor,
+                brushSize,
             });
-            
-        }
-    }
+        };
+    };
 
     endDraw = (e) => {
         console.log('Stopped Drawing');
-        this.setState({drawing:false});
-    }
+        this.setState({ drawing: false });
+    };
 
     drawLine = (x1, y1, x2, y2, brushColor, brushSize) => {
         let newcontext = this.state.context;
@@ -168,7 +172,7 @@ class Draw extends Component{
     handleOnChangeBrushSize = (e) =>{
         const value = e.target.value;
         this.setState({ brushSize: value });
-    }
+    };
 
     setMessages = (data) => {
 		this.setState({
@@ -192,16 +196,17 @@ class Draw extends Component{
 	};
 
     render(){
+        const { users, brushSize } = this.state;
+
         return(
             <div className='room-page'>
-                {/* {this.state.name} */}
                 <div className='canvas-row'>
                     <div className='tool-box'>
-                        <button onClick={this.eraseBoard} >Clean Board</button>
+                        <button onClick={this.eraseBoard}>Erase Canvas</button>
                         <div className='size-contain'>
                             <h3>Brush Size</h3>
-                            <div className='size-value'>{this.state.brushSize}</div>
-                            <input className='brush-size' type='range' min={1} max={5} value={this.state.brushSize} onChange={this.handleOnChangeBrushSize} />
+                            <div className='size-value'>{brushSize}</div>
+                            <input className='brush-size' type='range' min={1} max={5} value={brushSize} onChange={this.handleOnChangeBrushSize} />
                         </div>
                     </div>
                     <div className='canvas-contain' ref={(node)=>{this.canvasContain = node}}>
@@ -213,9 +218,7 @@ class Draw extends Component{
                     <div>
                         <h3>Users</h3>
                         <div>
-                            {this.state.users.map(user=>{
-                                return <div key={user.id}>{user.name}</div>
-                            })}
+                            {users.map((user) => <div key={user.id}>{user.name}</div> )}
                         </div>
                     </div>
                 </div>
