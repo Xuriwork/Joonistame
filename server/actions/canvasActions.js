@@ -18,8 +18,8 @@ const getCanvasByRoomId = (roomId) => canvases.filter((canvas) => canvas.roomId 
 
 const clearCanvas = (roomId) => {
     let canvas = getCanvasByRoomId(roomId);
-    canvas.data = [];
-    return canvas.data;
+    canvas = [];
+    return canvas;
 };
 
 const removeCanvas = (id) => {

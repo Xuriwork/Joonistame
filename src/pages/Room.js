@@ -23,12 +23,14 @@ class Draw extends Component{
             prevY: null
         }
     }
+
+    componentWillMount() {
+		const { authorized, history } = this.props;
+		if (!authorized) return history.push('/join');
+    };
     
     componentDidMount() {
-        
-        const { authorized, history } = this.props;
-        if (!authorized) return history.push('/join');
-        
+        if (!this.props.authorized) return;
         this.setUpCanvas();
         const socket = io(socketURL);
         this.setState({ socket });
@@ -54,6 +56,7 @@ class Draw extends Component{
     };
 
     onSocketMethods = (socket) => {
+        console.log('Test');
         console.log('id', socket);
 
         const { roomName, username } = this.props;
@@ -68,9 +71,13 @@ class Draw extends Component{
             this.setState({ users });
         });
 
-        socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
+        socket.on('SET_DRAWER', (drawer) => {
+            console.log('New User Connected');
+            this.setState({ drawer });
+        });
 
         socket.on('GET_CANVAS', (canvas) => {
+            console.log('Canvas', canvas);
             for(let i = 0; i < canvas.length; i++){
                 this.drawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].color, canvas[i].size);
             };
@@ -84,8 +91,9 @@ class Draw extends Component{
             this.state.context.clearRect(0, 0, this.state.width, this.state.height)
         });
 
-        socket.on('user left', (users) =>{
-            this.setState({ users });
+        socket.on('user left', (data) =>{
+            console.log('User left', data);
+            this.setState({users:data});
         })
 
         socket.on('RESIZED', (board)=>{
