@@ -2,8 +2,8 @@ import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import io from 'socket.io-client';
 
-import PainterTools from '../components/PainterTools';
-import UsersList from '../components/UsersList';
+import PainterTools from '../components/Room/PainterTools/PainterTools';
+import UsersList from '../components/Room/UsersList';
 
 const socketURL = 'http://localhost:5000';
 
@@ -82,12 +82,12 @@ class Draw extends Component{
         socket.on('GET_CANVAS', (canvas) => {
             console.log('Canvas', canvas);
             for(let i = 0; i < canvas.length; i++){
-                this.drawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].brushColor, canvas[i].brushSize);
+                this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].brushColor, canvas[i].brushSize);
             };
         });
 
         socket.on('DRAW', (data) => {
-            this.drawLine(data.x1, data.y1, data.x2, data.y2, data.brushColor, data.brushSize);
+            this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.brushColor, data.brushSize);
         });
 
         socket.on('ERASE_CANVAS', () => {
@@ -96,7 +96,7 @@ class Draw extends Component{
 
         socket.on('RESIZED', (board)=>{
             for(let i = 0; i < board.length; i++){
-                this.drawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].brushColor, board[i].brushSize);
+                this.handleDrawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].brushColor, board[i].brushSize);
             }
         });
 
@@ -111,7 +111,7 @@ class Draw extends Component{
         }, false)        
     };
     
-    startDraw = () => {
+    handleStartDrawing = () => {
         console.log('Started Drawing');
         this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
@@ -128,7 +128,7 @@ class Draw extends Component{
         if (drawing) {
             console.log('Drawing', x, y);
 
-            this.drawLine(prevX, prevY, x, y, brushColor, brushSize);
+            this.handleDrawLine(prevX, prevY, x, y, brushColor, brushSize);
             this.setState({ prevX: x, prevY: y });
 
             socket.emit('DRAW', {
@@ -142,12 +142,12 @@ class Draw extends Component{
         };
     };
 
-    endDraw = (e) => {
+    handleEndDrawing = (e) => {
         console.log('Stopped Drawing');
         this.setState({ drawing: false });
     };
 
-    drawLine = (x1, y1, x2, y2, brushColor, brushSize) => {
+    handleDrawLine = (x1, y1, x2, y2, brushColor, brushSize) => {
         let newcontext = this.state.context;
 
         newcontext.strokeStyle = brushColor;
@@ -211,8 +211,8 @@ class Draw extends Component{
                     />
                     <div className='canvas-container' ref={(node) => { this.canvasContain = node }}>
                         <canvas id='canvas' ref={(node) => { this.canvas = node }} 
-                            onMouseDown={this.startDraw} onMouseUp={this.endDraw} 
-                            onMouseMove={this.drawing} onMouseOut={this.endDraw}
+                            onMouseDown={this.handleStartDrawing} onMouseUp={this.handleEndDrawing} 
+                            onMouseMove={this.drawing} onMouseOut={this.handleEndDrawing}
                         />
                     </div>
                     <UsersList />
