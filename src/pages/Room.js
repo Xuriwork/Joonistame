@@ -15,8 +15,8 @@ class Draw extends Component{
             context: null,
             width: null, 
             height: null,
-            color: 'black', 
-            size: 1,
+            brushSize: 1,
+            brushColor: '#000000', 
             x: null, 
             y: null, 
             prevX: null, 
@@ -79,12 +79,12 @@ class Draw extends Component{
         socket.on('GET_CANVAS', (canvas) => {
             console.log('Canvas', canvas);
             for(let i = 0; i < canvas.length; i++){
-                this.drawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].color, canvas[i].size);
+                this.drawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].brushColor, canvas[i].brushSize);
             };
         });
 
         socket.on('DRAW', (data) => {
-            this.drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.size);
+            this.drawLine(data.x1, data.y1, data.x2, data.y2, data.brushColor, data.brushSize);
         });
 
         socket.on('ERASE_CANVAS', () => {
@@ -98,7 +98,7 @@ class Draw extends Component{
 
         socket.on('RESIZED', (board)=>{
             for(let i = 0; i < board.length; i++){
-                this.drawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].color, board[i].size);
+                this.drawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].brushColor, board[i].brushSize);
             }
         });
 
@@ -109,9 +109,8 @@ class Draw extends Component{
         }, false)        
     }
 
-    selectColor = (color) => {
-        console.log('Changing color to', color);
-        this.setState({ color });
+    selectColor = (brushColor) => {
+        this.setState({ brushColor });
     };
     
     startDraw = (e) => {
@@ -126,15 +125,15 @@ class Draw extends Component{
         this.setState({ x, y});
         if(this.state.drawing){
             console.log('Drawing', x, y);
-            this.drawLine(this.state.prevX, this.state.prevY, x, y, this.state.color, this.state.size);
+            this.drawLine(this.state.prevX, this.state.prevY, x, y, this.state.brushColor, this.state.brushSize);
             this.setState({prevX:x, prevY:y});
             this.state.socket.emit('DRAW', {
                 'x1': this.state.prevX,
 				'y1': this.state.prevY,
 				'x2': x,
                 'y2': y,
-                color: this.state.color,
-                size:this.state.size
+                brushColor: this.state.brushColor,
+                brushSize: this.state.brushSize
             });
             
         }
@@ -145,11 +144,11 @@ class Draw extends Component{
         this.setState({drawing:false});
     }
 
-    drawLine = (x1, y1, x2, y2, color, size) => {
+    drawLine = (x1, y1, x2, y2, brushColor, brushSize) => {
         let newcontext = this.state.context;
 
-        newcontext.strokeStyle = color;
-        newcontext.lineWidth = size;
+        newcontext.strokeStyle = brushColor;
+        newcontext.lineWidth = brushSize;
 
         this.setState({context:newcontext}, () => {
             this.state.context.beginPath();        
@@ -166,10 +165,9 @@ class Draw extends Component{
         // this.setState({context:this.state.context.clearRect(0, 0, this.state.width, this.state.height) });
     };
 
-    _handleInputChange = (e) =>{
+    handleOnChangeBrushSize = (e) =>{
         const value = e.target.value;
-        const name = e.target.name;
-        this.setState({[name]: value});
+        this.setState({ brushSize: value });
     }
 
     setMessages = (data) => {
@@ -195,29 +193,19 @@ class Draw extends Component{
 
     render(){
         return(
-            <div className={'draw-container'}>
-                <div className={'main-title'}>Junction Draw</div>
+            <div className='room-page'>
                 {/* {this.state.name} */}
-                <div className={'canvas-row'}>
-                    <div className={'tool-box'}>
+                <div className='canvas-row'>
+                    <div className='tool-box'>
                         <button onClick={this.eraseBoard} >Clean Board</button>
-                        <div className={'color-contain'}>
-                            <h3>Colors</h3>
-                            <button className={'color-button'} style={{backgroundColor:'red'}} onClick={()=>this.selectColor('red')} />
-                            <button className={'color-button'} style={{backgroundColor:'green'}} onClick={()=>this.selectColor('green')} />
-                            <button className={'color-button'} style={{backgroundColor:'blue'}} onClick={()=>this.selectColor('blue')} />
-                            <button className={'color-button'} style={{backgroundColor:'yellow'}} onClick={()=>this.selectColor('yellow')} />
-                            <button className={'color-button'} style={{backgroundColor:'orange'}} onClick={()=>this.selectColor('orange')} />
-                            <button className={'color-button'} style={{backgroundColor:'purple'}} onClick={()=>this.selectColor('purple')} />
-                        </div>
-                        <div className={'size-contain'}>
+                        <div className='size-contain'>
                             <h3>Brush Size</h3>
-                            <div className={'size-value'}>{this.state.size}</div>
-                            <input className={'brush-size'} name={'size'} type='range' min={1} max={5} value={this.state.size} onChange={this._handleInputChange} />
+                            <div className='size-value'>{this.state.brushSize}</div>
+                            <input className='brush-size' type='range' min={1} max={5} value={this.state.brushSize} onChange={this.handleOnChangeBrushSize} />
                         </div>
                     </div>
-                    <div className={'canvas-contain'} ref={(node)=>{this.canvasContain = node}}>
-                        <canvas id={'canvas'} ref={(node)=>{this.canvas = node}} 
+                    <div className='canvas-contain' ref={(node)=>{this.canvasContain = node}}>
+                        <canvas id='canvas' ref={(node)=>{this.canvas = node}} 
                             onMouseDown={this.startDraw} onMouseUp={this.endDraw} 
                             onMouseMove={this.drawing} onMouseOut={this.endDraw}
                         />
