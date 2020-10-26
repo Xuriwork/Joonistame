@@ -1,5 +1,17 @@
-* { margin: 0; padding: 0; text-decoration: none; }
+* { margin: 0; padding: 0; text-decoration: none; font-family: 'Titillium Web', sans-serif; }
 
 html, body, #root {
   height: 100%;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, button {
+  border: none;
+}
+
+input:focus, button:focus {
+  outline: none;
 }
