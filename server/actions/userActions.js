@@ -1,10 +1,6 @@
 const users = [];
 
 const addUser = ({ id, username, roomName }) => {
-
-    username = username.trim();
-    roomName = roomName.trim();
-
     const user = { id, username, roomName };
     users.push(user);
 

@@ -1,9 +1,6 @@
 const rooms = [];
 
 const addRoom = ({ drawer, name, roomId }) => {
-
-    name = name.trim();
-
     const room = { drawer, name, roomId, queue: [], maxRoomSize: 20 };
     rooms.push(room);
 

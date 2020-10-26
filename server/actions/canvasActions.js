@@ -1,8 +1,8 @@
 const canvases = [];
 
-const addCanvas = ({ data, roomId }) => {
+const addCanvas = ({ roomId }) => {
 
-    const canvas = { data, roomId };
+    const canvas = { data: [], roomId };
     canvases.push(canvas);
 
     return canvas;
@@ -14,7 +14,7 @@ const updateCanvas = (roomId, data) => {
     return canvas;
 };
 
-const getCanvasByRoomId = (roomId) => canvases.filter((room) => room.roomId === roomId)[0];
+const getCanvasByRoomId = (roomId) => canvases.filter((canvas) => canvas.roomId === roomId)[0];
 
 const clearCanvas = (roomId) => {
     let canvas = getCanvasByRoomId(roomId);

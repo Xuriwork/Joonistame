@@ -23,13 +23,20 @@ io.on('connection', (socket) => {
 
   socket.on('JOIN', ({ username, roomName }) => {
     console.log('New user connected', username, socket.id);
+
+    roomName = roomName.trim();
+    username = username.trim();
+
     addUser({ id: socket.id, username, roomName });
 
     const users = getAllUsersInRoom(roomName);
 
     const room = getRoomByName(roomName);
     const roomId = shortid.generate();
-    if (!room) addRoom({ name: roomName, drawer: users[0].id, roomId });
+    if (!room) {
+      addRoom({ name: roomName, drawer: users[0].id, roomId });
+      addCanvas({ roomId })
+    };
 
     const { drawer } = getRoomByName(roomName);
 
@@ -37,7 +44,10 @@ io.on('connection', (socket) => {
     socket.roomId = roomId;
     socket.roomName = roomName;
 
+    console.log(socket.roomId);
+
     const canvas = getCanvasByRoomId(socket.roomId);
+    console.log(canvas);
     socket.emit('GET_CANVAS', canvas.data);
     
     socket.emit('SET_DRAWER', drawer);
