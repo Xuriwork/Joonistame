@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import io from 'socket.io-client';
 
 import PainterTools from '../components/PainterTools';
+import UsersList from '../components/UsersList';
 
 const socketURL = 'http://localhost:5000';
 
@@ -203,25 +204,18 @@ class Draw extends Component{
         return(
             <div className='room-page'>
                 <div className='canvas-row'>
-                    <div className='tool-box'>
-                        <PainterTools 
-                            handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
-                            brushSize={brushSize} 
-                            handleEraseBoard={this.handleEraseBoard}
-                        />
-                    </div>
+                    <PainterTools 
+                        handleOnChangeBrushSize={this.handleOnChangeBrushSize} 
+                        brushSize={brushSize} 
+                        handleEraseBoard={this.handleEraseBoard}
+                    />
                     <div className='canvas-container' ref={(node) => { this.canvasContain = node }}>
                         <canvas id='canvas' ref={(node) => { this.canvas = node }} 
                             onMouseDown={this.startDraw} onMouseUp={this.endDraw} 
                             onMouseMove={this.drawing} onMouseOut={this.endDraw}
                         />
                     </div>
-                    <div>
-                        <h3>Users</h3>
-                        <div>
-                            {users.map((user) => <div key={user.id}>{user.name}</div> )}
-                        </div>
-                    </div>
+                    <UsersList />
                 </div>
             </div>
         )
