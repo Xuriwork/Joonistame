@@ -9,27 +9,30 @@ import UsersList from '../components/Room/UsersList';
 
 const socketURL = 'http://localhost:5000';
 
+// const mockMessages = [
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+// ];
+
 class Draw extends Component{
     constructor(){
         super();
         this.state = {
             socket: null,
+            drawer: null,
             users: [],
-            messages: [
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-            ],
+            messages: [],
             drawing: false,
             context: null,
             width: null, 
             height: null,
-            pencilSize: 1,
+            pencilSize: 2,
             pencilColor: '#000000', 
             x: null, 
             y: null, 
@@ -39,10 +42,8 @@ class Draw extends Component{
     };
     
     componentDidMount() {
-        console.log('dsadas');
         const { isAuthorized, history } = this.props;
         if (!isAuthorized) return history.push('/join');
-        console.log(isAuthorized);
         
         this.setUpCanvas();
     };
@@ -55,9 +56,6 @@ class Draw extends Component{
     };
 
     setUpCanvas = () => {
-        // let width = window.innerWidth;
-        // let height = window.innerHeight;
-        console.log('Parent size', this.canvasContainer.offsetWidth, this.canvasContainer.offsetHeight);
         let width = this.canvasContainer.offsetWidth;
         let height = this.canvasContainer.offsetHeight;
         this.setState({ context:this.canvas.getContext('2d'), width, height })
@@ -86,15 +84,9 @@ class Draw extends Component{
 			socket.emit('JOIN', { roomName, username });
 		});
         
-        socket.on('GET_USERS', (users) => {
-            console.log('New User Connected');
-            this.setState({ users });
-        });
+        socket.on('GET_USERS', (users) => this.setState({ users }));
 
-        socket.on('SET_DRAWER', (drawer) => {
-            console.log('New User Connected');
-            this.setState({ drawer });
-        });
+        socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
 
         socket.on('GET_CANVAS', (canvas) => {
             console.log('Canvas', canvas);
@@ -114,7 +106,7 @@ class Draw extends Component{
         socket.on('RESIZED', (board)=>{
             for(let i = 0; i < board.length; i++){
                 this.handleDrawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].pencilColor, board[i].pencilSize);
-            }
+            };
         });
 
         socket.on('MESSAGE', (data) => this.setMessages(data));
@@ -123,18 +115,24 @@ class Draw extends Component{
             this.setState({ users });
         });
         
-        window.addEventListener('resize', () => {
-            console.log('Resizing');
-        }, false)        
+        // window.addEventListener('resize', () => {
+        //     console.log('Resizing');
+        // }, false);     
     };
     
     handleStartDrawing = () => {
+        const { drawer, socket } = this.state;
+        if (drawer !== socket.id) return;
+        
         console.log('Started Drawing');
         this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
 
-    drawing = (e) => {
-        const { drawing, prevX, prevY, pencilColor, pencilSize, socket } = this.state;
+    handleDrawing = (e) => {
+        const { drawer, drawing, prevX, prevY, pencilColor, pencilSize, socket } = this.state;
+
+        console.log(drawer, socket.id);
+        if (drawer !== socket.id) return;
 
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -159,8 +157,10 @@ class Draw extends Component{
         };
     };
 
-    handleEndDrawing = (e) => {
-        console.log('Stopped Drawing');
+    handleEndDrawing = () => {
+        const { drawer, socket } = this.state;
+        if (drawer !== socket.id) return;
+
         this.setState({ drawing: false });
     };
 
@@ -216,9 +216,7 @@ class Draw extends Component{
     };
     
     
-    render(){
-
-        
+    render() {
         const { socket, users, pencilSize, messages } = this.state;
 
         return(
@@ -228,7 +226,7 @@ class Draw extends Component{
                     <Canvas 
                         handleStartDrawing={this.handleStartDrawing} 
                         handleEndDrawing={this.handleEndDrawing} 
-                        drawing={this.drawing}
+                        handleDrawing={this.handleDrawing}
                         canvas={(node) => { this.canvas = node }}
                         canvasContainer={(node) => { this.canvasContainer = node }}
                     />

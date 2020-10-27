@@ -7,7 +7,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, removeUser, getAllUsersInRoom } = require('./actions/userActions');
+const { addUser, removeUser, getAllUsersInRoom, getUser } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoomByName } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomId, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 
@@ -35,6 +35,10 @@ io.on('connection', (socket) => {
 
     const room = getRoomByName(roomName);
     const roomId = shortid.generate();
+    
+    console.log(socket.id);
+    console.log(users);
+
     if (!room) {
       addRoom({ name: roomName, drawer: users[0].id, roomId });
       addCanvas({ roomId });
@@ -47,11 +51,19 @@ io.on('connection', (socket) => {
     socket.roomId = roomId;
     socket.roomName = roomName;
 
-    console.log(socket.roomId);
+    io.in(roomName).emit('MESSAGE', {
+      type: 'SERVER-USER_JOINED',
+      content: `${username} joined the room. 👋`
+    });
+    
+    socket.to(roomName).emit('NEW_USER_JOINED');
 
     const canvas = getCanvasByRoomId(socket.roomId);
     console.log(canvas);
-    socket.emit('GET_CANVAS', canvas.data);
+    
+    if (canvas !== undefined) {
+      socket.emit('GET_CANVAS', canvas.data);
+    };
     
     socket.emit('SET_DRAWER', drawer);
     io.in(roomName).emit('GET_USERS', users);
@@ -63,6 +75,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('DRAW', (data) => {
+
+    const { drawer } = getRoomByName(socket.roomName);
+    if (drawer !== socket.id) return;
+
     const canvas = updateCanvas(socket.roomId, data);
     socket.broadcast.emit('DRAW', canvas);
   });
@@ -73,10 +89,18 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('ERASE_CANVAS');
   });
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on('SEND_MESSAGE', (data) => {
+    const user = getUser(socket.id);
+    io.in(user.roomName).emit('MESSAGE', { 
+      username: user.username, 
+      content: data.content, 
+      id: socket.id 
+    });
+  });
 
+  socket.on('disconnect', () => {
     const user = removeUser(socket.id);
+
     if (user) {
       const room = getRoomByName(socket.roomName);
 

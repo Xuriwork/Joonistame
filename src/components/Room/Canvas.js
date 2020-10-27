@@ -1,10 +1,10 @@
-const Canvas = ({ handleStartDrawing, handleEndDrawing, drawing, canvas, canvasContainer }) => {
-
+const Canvas = ({ handleStartDrawing, handleEndDrawing, handleDrawing, canvas, canvasContainer }) => {
+    
     return (
         <div className='canvas-container' ref={canvasContainer}>
             <canvas ref={canvas} 
                 onMouseDown={handleStartDrawing} onMouseUp={handleEndDrawing} 
-                onMouseMove={drawing} onMouseOut={handleEndDrawing}
+                onMouseMove={handleDrawing} onMouseOut={handleEndDrawing}
             />
         </div>
     )

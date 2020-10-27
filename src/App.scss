@@ -107,11 +107,11 @@
 }
 
 .room-page {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
+  @extend %flex-complete-center-column;
   padding: 20px;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
 }
 
 .room-page > div {
@@ -125,7 +125,6 @@
   position: relative;
   border: solid 2px black;
   width: 100%;
-  max-width: 900px;
   height: 100%;
   background-color: #ffffff;
   box-sizing: border-box;
@@ -139,7 +138,8 @@
 }
 
 .users-list-container {
-  width: 250px;
+  width: 400px;
+  min-width: 200px;
   padding: 10px;
   box-sizing: border-box;
   display: flex;
@@ -147,7 +147,8 @@
 }
 
 .sidebar_second {
-  width: 260px;
+  width: 400px;
+  min-width: 250px;
   height: 100%;
   padding: 10px;
   display: flex;
@@ -413,18 +414,21 @@
 
 .SERVER-USER_JOINED {
   @extend %SERVER_MESSAGE;
-  color: #23da90;
+  color: #25ecad;
+  background-image: none;
   background-color: #41e0a152;
 }
 
 .SERVER-USER_LEFT {
   @extend %SERVER_MESSAGE;
   color: #833c34;
+  background-image: none;
   background-color: #f58c7e;
 }
 
-.NEW_HOST {
+.NEW_DRAWER {
   @extend %SERVER_MESSAGE;
   color: #ffffff;
+  background-image: none;
   background-color: #ec570d;
 }

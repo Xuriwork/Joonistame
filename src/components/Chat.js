@@ -73,15 +73,15 @@ const Chat = ({ messages, sendMessage, socket }) => {
                                 ? 'SERVER-USER_JOINED message'
                                 : type === 'SERVER-USER_LEFT'
                                 ? 'SERVER-USER_LEFT message'
-                                : type === 'NEW_HOST'
-                                ? 'NEW_HOST message'
+                                : type === 'NEW_NEW_DRAWER'
+                                ? 'NEW_NEW_DRAWER message'
                                 : 'message'
                         }
                         key={index}
                     >
                         {type === 'SERVER-USER_JOINED' ||
                         type === 'SERVER-USER_LEFT' ||
-                        type === 'NEW_HOST' ? null : (
+                        type === 'NEW_NEW_DRAWER' ? null : (
                             <h4 className='message-author' data-you={authorId === socket?.id}>
                                 {username}
                             </h4>
