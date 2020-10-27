@@ -71,14 +71,9 @@ class Draw extends Component{
     };
 
     onSocketMethods = (socket) => {
-        
-        console.log('Test');
-        console.log('id', socket);
 
         const { roomName, username } = this.props;
         const { context, width, height } = this.state;
-
-        console.log(this.props);
         
         socket.on('connect', () => {
 			socket.emit('JOIN', { roomName, username });
@@ -89,7 +84,6 @@ class Draw extends Component{
         socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
 
         socket.on('GET_CANVAS', (canvas) => {
-            console.log('Canvas', canvas);
             for(let i = 0; i < canvas.length; i++){
                 this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].pencilColor, canvas[i].pencilSize);
             };
@@ -123,15 +117,13 @@ class Draw extends Component{
     handleStartDrawing = () => {
         const { drawer, socket } = this.state;
         if (drawer !== socket.id) return;
-        
-        console.log('Started Drawing');
+
         this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
 
     handleDrawing = (e) => {
         const { drawer, drawing, prevX, prevY, pencilColor, pencilSize, socket } = this.state;
-
-        console.log(drawer, socket.id);
+        
         if (drawer !== socket.id) return;
 
         const rect = this.canvas.getBoundingClientRect();
@@ -141,8 +133,6 @@ class Draw extends Component{
         this.setState({ x, y });
 
         if (drawing) {
-            console.log('Drawing', x, y);
-
             this.handleDrawLine(prevX, prevY, x, y, pencilColor, pencilSize);
             this.setState({ prevX: x, prevY: y });
 
