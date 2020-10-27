@@ -116,11 +116,14 @@ class Draw extends Component{
     };
     
     handleStartDrawing = () => {
+        if (this.state.tool === 'Paint Bucket') return;
         this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
 
     handleDrawing = (e) => {
         const { drawing, prevX, prevY, tool, pencilColor, pencilSize, socket } = this.state;
+
+        if (tool === 'Paint Bucket') return;
 
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -155,25 +158,8 @@ class Draw extends Component{
         this.setState({ drawing: false });
     };
 
-    handleEraseCanvas = (prevX, prevY, x, y) => {
-        let context = this.state.context;
-
-        if (!context) return;
-        
-        context.globalCompositeOperation = 'destination-out';
-        context.beginPath();
-        context.arc(x, y, 10, 0, 2 * Math.PI);
-        context.fill();
-    
-        context.lineWidth = 20;
-        context.beginPath();
-        context.moveTo(prevX, prevY);
-        context.lineTo(x, y);
-        context.stroke();
-    };
-
     handleDrawLine = (x1, y1, x2, y2, pencilColor, pencilSize) => {
-        let context = this.state.context;
+        const context = this.state.context;
 
         if (!context) return;
 
@@ -191,6 +177,23 @@ class Draw extends Component{
         });
     };
 
+    handleEraseCanvas = (prevX, prevY, x, y) => {
+        const context = this.state.context;
+
+        if (!context) return;
+        
+        context.globalCompositeOperation = 'destination-out';
+        context.beginPath();
+        context.arc(x, y, 10, 0, 2 * Math.PI);
+        context.fill();
+    
+        context.lineWidth = 20;
+        context.beginPath();
+        context.moveTo(prevX, prevY);
+        context.lineTo(x, y);
+        context.stroke();
+    };
+
     handleClearCanvas = () => {
         this.state.socket.emit('CLEAR_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
@@ -201,9 +204,14 @@ class Draw extends Component{
         this.setState({ pencilSize: value });
     };
 
-    handleChangeColor = (pencilColor) => {
-        console.log(pencilColor);
-        this.setState({ pencilColor });
+    handleChangeColor = (color) => this.setState({ pencilColor: color });
+
+    handleUseBucket = () => {
+        const { context, width, height, pencilColor } = this.state;
+
+        context.fillStyle = pencilColor;
+        context.fillRect(0, 0, width, height);
+        this.setState({ context });
     };
 
     setMessages = (data) => {
@@ -247,6 +255,7 @@ class Draw extends Component{
                         handleStartDrawing={this.handleStartDrawing} 
                         handleEndDrawing={this.handleEndDrawing} 
                         handleDrawing={this.handleDrawing}
+                        handleUseBucket={this.handleUseBucket}
                         canvas={(node) => { this.canvas = node }}
                         canvasContainer={(node) => { this.canvasContainer = node }}
                         tool={tool}

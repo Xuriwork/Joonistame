@@ -120,16 +120,18 @@
   display: flex;
   background-image: linear-gradient(to bottom, #525E94, #323b68);
   border-radius: 10px;
+  border: solid 2px rgb(236, 236, 236);
 }
 
 .canvas-container {
   position: relative;
-  border: solid 2px rgb(192, 192, 192);
   width: 100%;
   height: 100%;
   background-color: #ffffff;
   box-sizing: border-box;
-
+  border-left: solid 2px rgb(236, 236, 236);
+  border-right: solid 2px rgb(236, 236, 236);
+  
   canvas {
     margin: 0;
     padding: 0;
