@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import shortid from 'shortid';
 import { validateJoinRoomData } from '../utils/validators';
 
-const Join = ({ setAuthorized, handleSetCredentials }) => {
+const Join = ({ setIsAuthorized, handleSetCredentials }) => {
     const history = useHistory();
     const [username, setUsername] = useState('');
     const [roomName, setRoomName] = useState('');
@@ -27,7 +27,7 @@ const Join = ({ setAuthorized, handleSetCredentials }) => {
 		if (!valid) return setErrors(errors);
         
         handleSetCredentials(username, roomName);
-        setAuthorized(true);
+        setIsAuthorized(true);
         history.push('/');
     };
 

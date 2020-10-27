@@ -15,7 +15,9 @@ class Draw extends Component{
         this.state = {
             socket: null,
             users: [],
-            messages: [],
+            messages: [
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 }
+            ],
             drawing: false,
             context: null,
             width: null, 
@@ -28,10 +30,13 @@ class Draw extends Component{
             prevY: null
         }
     }
+    
 
     componentDidMount() {
-        const { authorized, history } = this.props;
-        if (!authorized) return history.push('/join');
+        console.log('dsadas');
+        const { isAuthorized, history } = this.props;
+        if (!isAuthorized) return history.push('/join');
+        console.log(isAuthorized);
         
         this.setUpCanvas();
     };
@@ -39,7 +44,7 @@ class Draw extends Component{
     componentWillUnmount() {  
 		if (this.state.socket) {
 			this.state.socket.removeAllListeners();
-			this.props.setAuthorized(false);
+			this.props.setIsAuthorized(false);
 		};
     };
 
@@ -205,7 +210,7 @@ class Draw extends Component{
 	};
 
     render(){
-        const { users, pencilSize, messages } = this.state;
+        const { socket, users, pencilSize, messages } = this.state;
 
         return(
             <div className='room-page'>
@@ -224,7 +229,11 @@ class Draw extends Component{
                             pencilSize={pencilSize} 
                             handleEraseCanvas={this.handleEraseCanvas}
                         />
-                        <Chat messages={messages} />
+                        <Chat 
+                            socket={socket} 
+                            messages={messages} 
+                            sendMessage={this.sendMessage} 
+                        />
                     </div>
                 </div>
             </div>

@@ -17,15 +17,15 @@ const ColorPalette = ({ setPencilColor }) => {
 	
 	return (
 		<div className='color-palette'>
-		{colors.map((color) => (
-			<div
-				key={color}
-				className='color'
-				style={{ backgroundColor: color }}
-				onClick={() => changeColor(color)}
-			></div>
-		))}
-	</div>
+			{colors.map((color) => (
+				<div
+					key={color}
+					className='color'
+					style={{ backgroundColor: color }}
+					onClick={() => changeColor(color)}
+				></div>
+			))}
+		</div>
 	)
 };
 

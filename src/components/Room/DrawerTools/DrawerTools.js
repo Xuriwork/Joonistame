@@ -9,28 +9,26 @@ import { useState } from 'react';
 
 const buttons = [
     { name: 'Pencil', icon: PencilIcon },
-    { name: 'Trash', icon: TrashBinIcon },
+    { name: 'Eraser', icon: EraserIcon },
     { name: 'Paint Bucket', icon: PaintBucketIcon },
+    { name: 'Trash', icon: TrashBinIcon },
 ];
 
 const DrawerTools = ({ handleOnChangePencilSize, pencilSize, handleEraseCanvas }) => {
-    const [toolView, setToolView] = useState('Pencil');
+    const [tool, setTool] = useState('Pencil');
 
-    const handleChangeToolView = (tool) => setToolView(tool);
+    const handleChangeTool = (tool) => setTool(tool);
 
     return (
 			<div className='drawer-tools-container'>
 				<div className='buttons-container'>
                     {
                         buttons.map(({ name, icon: Icon }) => (
-                            <button key={name} onClick={() => handleChangeToolView(name)}>
+                            <button key={name} onClick={() => handleChangeTool(name)} className={tool === name ? 'selected' : ''}>
                                 <Icon />
                             </button>
                         ))
                     }
-                    <button onClick={handleEraseCanvas}>
-                        <EraserIcon />
-                    </button>
 				</div>
 				<PencilSize
 					pencilSize={pencilSize}
