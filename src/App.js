@@ -24,11 +24,11 @@ const App = () => {
 					<PrivateRoute
 						exact
 						path='/'
-						isAuthorized={isAuthorized}
-						component={Room}
+						component={(props) => <Room {...props} />}
 						setIsAuthorized={setIsAuthorized}
 						username={info.username}
 						roomName={info.roomName}
+						isAuthorized={isAuthorized}
 					/>
 					<PublicRoute
 						path='/join'

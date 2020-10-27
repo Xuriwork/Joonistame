@@ -5,8 +5,6 @@ const Chat = ({ messages, sendMessage, socket }) => {
 	const [message, setMessage] = useState('');
 	const [newMessagePopup, setNewMessagePopup] = useState(false);
     const chatContainerRef = useRef(null);
-    
-    console.log(socket);
 	
 	const scrollToBottom = (force = false) => {
 		const chatContainer = chatContainerRef.current;
@@ -63,7 +61,7 @@ const Chat = ({ messages, sendMessage, socket }) => {
         sendMessage(message);
 		scrollToBottom(true);
 		setMessage('');
-	};
+    };
 	
 	return (
         <div className='chat-container'>
@@ -84,7 +82,7 @@ const Chat = ({ messages, sendMessage, socket }) => {
                         {type === 'SERVER-USER_JOINED' ||
                         type === 'SERVER-USER_LEFT' ||
                         type === 'NEW_HOST' ? null : (
-                            <h4 className='message-author' data-you={authorId === socket.id}>
+                            <h4 className='message-author' data-you={authorId === socket?.id}>
                                 {username}
                             </h4>
                         )}
@@ -93,7 +91,7 @@ const Chat = ({ messages, sendMessage, socket }) => {
                 ))}
             </div>
             {newMessagePopup && (
-                <span className='new-messages-alert' onClick={handleSeeNewMessages}>
+                <span className='new-messages-banner' onClick={handleSeeNewMessages}>
                     New messages <img src={DownArrowIcon} alt='Scroll down' />{' '}
                 </span>
             )}
@@ -105,7 +103,6 @@ const Chat = ({ messages, sendMessage, socket }) => {
                     onKeyDown={handleOnKeyDown}
                     placeholder='Say something'
                 />
-                <button onClick={handleSendMessage}>Send</button>
             </div>
         </div>
 	);

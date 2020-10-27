@@ -1,19 +1,20 @@
 import { Route, Redirect } from 'react-router-dom';
 
-export const PrivateRoute = ({component: Component, isAuthorized, ...rest }) => {
+export const PrivateRoute = ({ component: Component, isAuthorized, ...rest }) => {
+  
   return (
-    <Route {...rest} render={props => isAuthorized
-      ? <Component isAuthorized={isAuthorized} {...props} />
+    <Route {...rest} render={() => isAuthorized
+      ? <Component isAuthorized={isAuthorized} {...rest} />
       : <Redirect to={{ pathname:'/join' }} />
     }
     />
   )
 };
 
-export const PublicRoute = ({component: Component, restricted, isAuthorized, ...rest}) => {
+export const PublicRoute = ({ component: Component, restricted, isAuthorized, ...rest }) => {
     return (
-        <Route {...rest} render={props => (
-            isAuthorized && restricted ? <Redirect to='/menu' /> : <Component {...props} />
+        <Route {...rest} render={() => (
+            isAuthorized && restricted ? <Redirect to='/menu' /> : <Component {...rest} />
         )} />
     );
 };

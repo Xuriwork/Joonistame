@@ -16,7 +16,14 @@ class Draw extends Component{
             socket: null,
             users: [],
             messages: [
-                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 }
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
+                { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
             ],
             drawing: false,
             context: null,
@@ -29,9 +36,8 @@ class Draw extends Component{
             prevX: null, 
             prevY: null
         }
-    }
+    };
     
-
     componentDidMount() {
         console.log('dsadas');
         const { isAuthorized, history } = this.props;
@@ -207,9 +213,12 @@ class Draw extends Component{
 			content: message,
 			username: this.props.username,
 		});
-	};
-
+    };
+    
+    
     render(){
+
+        
         const { socket, users, pencilSize, messages } = this.state;
 
         return(
