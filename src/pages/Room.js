@@ -245,7 +245,7 @@ class Draw extends Component{
     };
 
     render() {
-        const { socket, users, pencilSize, messages, tool } = this.state;
+        const { socket, context, users, pencilSize, messages, tool } = this.state;
 
         return(
             <div className='room-page'>
@@ -259,6 +259,7 @@ class Draw extends Component{
                         canvas={(node) => { this.canvas = node }}
                         canvasContainer={(node) => { this.canvasContainer = node }}
                         tool={tool}
+                        context={context}
                     />
                     <div className='sidebar_second'>
                         <DrawerTools 
