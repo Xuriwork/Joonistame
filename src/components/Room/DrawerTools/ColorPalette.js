@@ -11,9 +11,7 @@ const colors = [
     '#6E3B3B',
 ];
 
-const ColorPalette = ({ setPencilColor }) => {
-
-	const changeColor = (selectedColor) => setPencilColor(selectedColor);
+const ColorPalette = ({ handleChangeColor }) => {
 	
 	return (
 		<div className='color-palette'>
@@ -22,7 +20,7 @@ const ColorPalette = ({ setPencilColor }) => {
 					key={color}
 					className='color'
 					style={{ backgroundColor: color }}
-					onClick={() => changeColor(color)}
+					onClick={() => handleChangeColor(color)}
 				></div>
 			))}
 		</div>

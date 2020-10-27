@@ -5,19 +5,14 @@ import { ReactComponent as PencilIcon } from '../../../assets/icons/pencil-fill.
 import { ReactComponent as TrashBinIcon } from '../../../assets/icons//delete-bin-7-fill.svg';
 import { ReactComponent as EraserIcon } from '../../../assets/icons/eraser-fill.svg';
 import { ReactComponent as PaintBucketIcon } from '../../../assets/icons/paint-line.svg';
-import { useState } from 'react';
 
 const buttons = [
     { name: 'Pencil', icon: PencilIcon },
     { name: 'Eraser', icon: EraserIcon },
     { name: 'Paint Bucket', icon: PaintBucketIcon },
-    { name: 'Trash', icon: TrashBinIcon },
 ];
 
-const DrawerTools = ({ handleOnChangePencilSize, pencilSize, handleEraseCanvas }) => {
-    const [tool, setTool] = useState('Pencil');
-
-    const handleChangeTool = (tool) => setTool(tool);
+const DrawerTools = ({ tool, handleChangeTool, handleOnChangePencilSize, handleChangeColor, pencilSize, handleClearCanvas }) => {
 
     return (
 			<div className='drawer-tools-container'>
@@ -29,12 +24,16 @@ const DrawerTools = ({ handleOnChangePencilSize, pencilSize, handleEraseCanvas }
                             </button>
                         ))
                     }
+                    <button onClick={handleClearCanvas} className={tool === 'Trash' ? 'selected' : ''}>
+                        <TrashBinIcon />
+                    </button>
 				</div>
 				<PencilSize
 					pencilSize={pencilSize}
 					handleOnChangePencilSize={handleOnChangePencilSize}
+                    tool={tool}
 				/>
-				<ColorPalette />
+				<ColorPalette handleChangeColor={handleChangeColor} />
 			</div>
 		);
 }

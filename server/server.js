@@ -75,18 +75,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('DRAW', (data) => {
-
-    const { drawer } = getRoomByName(socket.roomName);
-    if (drawer !== socket.id) return;
-
     const canvas = updateCanvas(socket.roomId, data);
     socket.broadcast.emit('DRAW', canvas);
   });
 
-  socket.on('ERASE_CANVAS', (data) => {
-    console.log('Erasing Canvas');
+  socket.on('CLEAR_CANVAS', (data) => {
+    console.log('Clearing Canvas');
     clearCanvas(socket.roomId);
-    socket.broadcast.emit('ERASE_CANVAS');
+    socket.broadcast.emit('CLEAR_CANVAS');
   });
 
   socket.on('SEND_MESSAGE', (data) => {

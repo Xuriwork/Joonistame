@@ -28,8 +28,9 @@ class Draw extends Component{
             drawer: null,
             users: [],
             messages: [],
-            drawing: false,
             context: null,
+            drawing: false,
+            tool: 'Pencil',
             width: null, 
             height: null,
             pencilSize: 2,
@@ -58,7 +59,7 @@ class Draw extends Component{
     setUpCanvas = () => {
         let width = this.canvasContainer.offsetWidth;
         let height = this.canvasContainer.offsetHeight;
-        this.setState({ context:this.canvas.getContext('2d'), width, height })
+        this.setState({ context: this.canvas.getContext('2d'), width, height })
         this.canvas.width = width;
         this.canvas.height = height;
         this.connect();
@@ -93,7 +94,7 @@ class Draw extends Component{
             this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
-        socket.on('ERASE_CANVAS', () => {
+        socket.on('CLEAR_CANVAS', () => {
             context.clearRect(0, 0, width, height)
         });
 
@@ -115,27 +116,27 @@ class Draw extends Component{
     };
     
     handleStartDrawing = () => {
-        const { drawer, socket } = this.state;
-        if (drawer !== socket.id) return;
-
         this.setState({ drawing: true, prevX: this.state.x, prevY: this.state.y });
     };
 
     handleDrawing = (e) => {
-        const { drawer, drawing, prevX, prevY, pencilColor, pencilSize, socket } = this.state;
-        
-        if (drawer !== socket.id) return;
+        const { drawing, prevX, prevY, tool, pencilColor, pencilSize, socket } = this.state;
 
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
+        
         this.setState({ x, y });
 
         if (drawing) {
-            this.handleDrawLine(prevX, prevY, x, y, pencilColor, pencilSize);
+            
+            if (tool === 'Pencil') {
+                this.handleDrawLine(prevX, prevY, x, y, pencilColor, pencilSize);
+            } else if (tool === 'Eraser') {
+                this.handleEraseCanvas(prevX, prevY, x, y);
+            };
+            
             this.setState({ prevX: x, prevY: y });
-
             socket.emit('DRAW', {
                 'x1': prevX,
 				'y1': prevY,
@@ -154,15 +155,35 @@ class Draw extends Component{
         this.setState({ drawing: false });
     };
 
+    handleEraseCanvas = (prevX, prevY, x, y) => {
+        let context = this.state.context;
+
+        if (!context) return;
+        
+        context.globalCompositeOperation = 'destination-out';
+        context.beginPath();
+        context.arc(x, y, 10, 0, 2 * Math.PI);
+        context.fill();
+    
+        context.lineWidth = 20;
+        context.beginPath();
+        context.moveTo(prevX, prevY);
+        context.lineTo(x, y);
+        context.stroke();
+    };
+
     handleDrawLine = (x1, y1, x2, y2, pencilColor, pencilSize) => {
-        let newcontext = this.state.context;
+        let context = this.state.context;
 
-        newcontext.strokeStyle = pencilColor;
-        newcontext.lineWidth = pencilSize;
+        if (!context) return;
 
-        this.setState({context:newcontext}, () => {
+        context.globalCompositeOperation = 'source-over';
+        context.strokeStyle = pencilColor;
+
+        this.setState({ context: context }, () => {
             const { context } = this.state;
             context.beginPath();        
+            context.lineWidth = pencilSize;
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);    
             context.stroke();
@@ -170,8 +191,8 @@ class Draw extends Component{
         });
     };
 
-    handleEraseCanvas = () => {
-        this.state.socket.emit('ERASE_CANVAS');
+    handleClearCanvas = () => {
+        this.state.socket.emit('CLEAR_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
     };
 
@@ -181,6 +202,7 @@ class Draw extends Component{
     };
 
     handleChangeColor = (pencilColor) => {
+        console.log(pencilColor);
         this.setState({ pencilColor });
     };
 
@@ -204,10 +226,18 @@ class Draw extends Component{
 			username: this.props.username,
 		});
     };
-    
-    
+
+    handleChangeTool = (tool) => {
+        console.log(tool);
+        this.setState({ tool });
+
+        if (tool === 'Pencil') {
+            this.setState({ pencilSize: '2' });
+        };
+    };
+
     render() {
-        const { socket, users, pencilSize, messages } = this.state;
+        const { socket, users, pencilSize, messages, tool } = this.state;
 
         return(
             <div className='room-page'>
@@ -219,12 +249,16 @@ class Draw extends Component{
                         handleDrawing={this.handleDrawing}
                         canvas={(node) => { this.canvas = node }}
                         canvasContainer={(node) => { this.canvasContainer = node }}
+                        tool={tool}
                     />
                     <div className='sidebar_second'>
                         <DrawerTools 
                             handleOnChangePencilSize={this.handleOnChangePencilSize} 
                             pencilSize={pencilSize} 
-                            handleEraseCanvas={this.handleEraseCanvas}
+                            handleChangeColor={this.handleChangeColor}
+                            handleClearCanvas={this.handleClearCanvas}
+                            handleChangeTool={this.handleChangeTool}
+                            tool={tool}
                         />
                         <Chat 
                             socket={socket} 

@@ -1,10 +1,9 @@
 const UsersList = ({ users }) => {
     return (
         <div className='users-list-container'>
-            <h3>Users</h3>
-            <div>
-                {users.map((user) => <div key={user.id}>{user.name}</div> )}
-            </div>
+            <ul>
+                {users.map((user) => <li key={user.id}>{user.username}</li> )}
+            </ul>
         </div>
     )
 }
