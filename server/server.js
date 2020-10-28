@@ -8,7 +8,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
 const { addUser, removeUser, getAllUsersInRoom, getUser } = require('./actions/userActions');
-const { addRoom, removeRoom, getRoomByName } = require('./actions/roomActions');
+const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomId, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 
 const PORT = process.env.PORT || 5000;
@@ -21,42 +21,42 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 io.on('connection', (socket) => {
 
-  socket.on('JOIN', ({ username, roomName }) => {
+  socket.on('JOIN', ({ username, roomID }) => {
     console.log('New user connected', username, socket.id);
 
-    roomName = roomName.trim();
+    roomID = roomID.trim();
     username = username.trim();
 
-    if (!roomName || !username) return;
+    if (!roomID || !username) return;
 
-    addUser({ id: socket.id, username, roomName });
+    addUser({ id: socket.id, username, roomID });
 
-    const users = getAllUsersInRoom(roomName);
+    const users = getAllUsersInRoom(roomID);
 
-    const room = getRoomByName(roomName);
+    const room = getRoomByRoomID(roomID);
     const roomId = shortid.generate();
     
     console.log(socket.id);
     console.log(users);
 
     if (!room) {
-      addRoom({ name: roomName, drawer: users[0].id, roomId });
+      addRoom({ drawer: users[0].id, roomId });
       addCanvas({ roomId });
       console.log('Added');
     };
 
-    const { drawer } = getRoomByName(roomName);
+    const { drawer } = getRoomByRoomID(roomID);
 
-    socket.join(roomName);
+    socket.join(roomID);
     socket.roomId = roomId;
-    socket.roomName = roomName;
+    socket.roomID = roomID;
 
-    io.in(roomName).emit('MESSAGE', {
+    io.in(roomID).emit('MESSAGE', {
       type: 'SERVER-USER_JOINED',
       content: `${username} joined the room. 👋`
     });
     
-    socket.to(roomName).emit('NEW_USER_JOINED');
+    socket.to(roomID).emit('NEW_USER_JOINED');
 
     const canvas = getCanvasByRoomId(socket.roomId);
     console.log(canvas);
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
     };
     
     socket.emit('SET_DRAWER', drawer);
-    io.in(roomName).emit('GET_USERS', users);
+    io.in(roomID).emit('GET_USERS', users);
   });
 
   socket.on('RESIZED', () => {
@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
 
   socket.on('SEND_MESSAGE', (data) => {
     const user = getUser(socket.id);
-    io.in(user.roomName).emit('MESSAGE', { 
+    io.in(user.roomID).emit('MESSAGE', { 
       username: user.username, 
       content: data.content, 
       id: socket.id 
@@ -98,31 +98,31 @@ io.on('connection', (socket) => {
     const user = removeUser(socket.id);
 
     if (user) {
-      const room = getRoomByName(socket.roomName);
+      const room = getRoomByRoomID(socket.roomID);
 
       const userWasAdmin = socket.id === room.drawer;
-      const users = getAllUsersInRoom(user.roomName);
+      const users = getAllUsersInRoom(user.roomID);
 
       if (userWasAdmin && users.length > 0) {
         room.drawer = users[0].id;
 
-        io.in(user.roomName).emit('SET_DRAWER', room.drawer);
-        io.in(user.roomName).emit('MESSAGE', {
+        io.in(user.roomID).emit('SET_DRAWER', room.drawer);
+        io.in(user.roomID).emit('MESSAGE', {
           type: 'NEW_DRAWER',
           content: `${users[0].username} is now the drawer. 🖌️`,
         });
 
       } else if (users.length === 0) {
-        removeRoom(socket.roomName);
+        removeRoom(socket.roomID);
         removeCanvas(socket.roomId);
       };
 
-      io.in(user.roomName).emit('MESSAGE', {
+      io.in(user.roomID).emit('MESSAGE', {
         type: 'SERVER_USER-LEFT',
         content: `${user.username} has left the room.`,
       });
 
-      io.in(user.roomName).emit('GET_USERS', users);
+      io.in(user.roomID).emit('GET_USERS', users);
     };
   });
 });

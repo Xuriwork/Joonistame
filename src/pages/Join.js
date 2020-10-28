@@ -6,15 +6,15 @@ import { validateJoinRoomData } from '../utils/validators';
 const Join = ({ setIsAuthorized, handleSetCredentials }) => {
     const history = useHistory();
     const [username, setUsername] = useState('');
-    const [roomName, setRoomName] = useState('');
+    const [roomID, setRoomID] = useState('');
     const [errors, setErrors] = useState({});
 
-    const handleOnChangeRoomName = (e) => setRoomName(e.target.value);
+    const handleOnChangeRoomID = (e) => setRoomID(e.target.value);
     const handleOnChangeUsername = (e) => setUsername(e.target.value);
 
-    const handleGenerateRandomRoomName = (e) => setRoomName(createRandomRoomName(e));
+    const handleGenerateRandomRoomID = (e) => setRoomID(createRandomRoomID(e));
 
-	const createRandomRoomName = (e) => {
+	const createRandomRoomID = (e) => {
         e.preventDefault();
         const randomId = shortid.generate() + shortid.generate();
 		return randomId;
@@ -22,11 +22,11 @@ const Join = ({ setIsAuthorized, handleSetCredentials }) => {
     
     const handleJoinRoom = (e) => {
         e.preventDefault();
-        const { valid, errors } = validateJoinRoomData(username, roomName);
+        const { valid, errors } = validateJoinRoomData(username, roomID);
         
 		if (!valid) return setErrors(errors);
         
-        handleSetCredentials(username, roomName);
+        handleSetCredentials(username, roomID);
         setIsAuthorized(true);
         history.push('/');
     };
@@ -34,19 +34,19 @@ const Join = ({ setIsAuthorized, handleSetCredentials }) => {
     return (
 			<div className='join-page'>
 				<form>
-					<label htmlFor='roomName'>Room Name</label>
+					<label htmlFor='roomID'>Room ID</label>
 					<input
 						type='text'
-						id='roomName'
-						onChange={handleOnChangeRoomName}
-						value={roomName}
-						className={errors.roomName && 'has-error'}
+						id='roomID'
+						onChange={handleOnChangeRoomID}
+						value={roomID}
+						className={errors.roomID && 'has-error'}
 					/>
-					{errors.roomName && (
-						<span className='error-message'>{errors.roomName}</span>
+					{errors.roomID && (
+						<span className='error-message'>{errors.roomID}</span>
 					)}
-					<button onClick={handleGenerateRandomRoomName}>
-						Generate Random Room Name
+					<button onClick={handleGenerateRandomRoomID}>
+						Generate Random Room ID
 					</button>
 					<label htmlFor='username'>Username</label>
 					<input
