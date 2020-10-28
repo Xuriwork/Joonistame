@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import shortid from 'shortid';
+import { customAlphabet } from 'nanoid/non-secure';
 import { validateJoinRoomData } from '../utils/validators';
+
+const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 20);
 
 const Join = ({ setIsAuthorized, handleSetCredentials }) => {
     const history = useHistory();
@@ -16,8 +18,9 @@ const Join = ({ setIsAuthorized, handleSetCredentials }) => {
 
 	const createRandomRoomID = (e) => {
         e.preventDefault();
-        const randomId = shortid.generate() + shortid.generate();
-		return randomId;
+		const randomId = nanoid();
+		const formatedStringId = randomId.substring(0,5) + '-' + randomId.substring(5, 10) + '-' + randomId.substring(10, 15) + '-' + randomId.substring(15, 20);
+		return formatedStringId;
     };
     
     const handleJoinRoom = (e) => {
