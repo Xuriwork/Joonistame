@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const shortid = require('shortid');
+const { nanoid } = require('nanoid');
 
 const app = express();
 const server = require('http').Server(app);
@@ -9,7 +9,7 @@ const io = require('socket.io')(server);
 
 const { addUser, removeUser, getAllUsersInRoom, getUser } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
-const { addCanvas, updateCanvas, getCanvasByRoomId, clearCanvas, removeCanvas } = require('./actions/canvasActions');
+const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 io.on('connection', (socket) => {
 
   socket.on('JOIN', ({ username, roomID }) => {
-    console.log('New user connected', username, socket.id);
+    console.log('New user connected', username, socket.id, roomID);
 
     roomID = roomID.trim();
     username = username.trim();
@@ -34,21 +34,20 @@ io.on('connection', (socket) => {
     const users = getAllUsersInRoom(roomID);
 
     const room = getRoomByRoomID(roomID);
-    const roomId = shortid.generate();
     
     console.log(socket.id);
     console.log(users);
 
     if (!room) {
-      addRoom({ drawer: users[0].id, roomId });
-      addCanvas({ roomId });
+      addRoom({ drawer: users[0].id, roomID });
+      addCanvas({ roomID });
       console.log('Added');
     };
 
     const { drawer } = getRoomByRoomID(roomID);
 
     socket.join(roomID);
-    socket.roomId = roomId;
+    socket.roomID = roomID;
     socket.roomID = roomID;
 
     io.in(roomID).emit('MESSAGE', {
@@ -58,8 +57,8 @@ io.on('connection', (socket) => {
     
     socket.to(roomID).emit('NEW_USER_JOINED');
 
-    const canvas = getCanvasByRoomId(socket.roomId);
-    console.log(canvas);
+    const canvas = getCanvasByRoomID(socket.roomID);
+    console.log('canvas', canvas);
     
     if (canvas !== undefined) {
       socket.emit('GET_CANVAS', canvas.data);
@@ -70,18 +69,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('RESIZED', () => {
-    const canvas = getCanvasByRoomId(socket.roomId);
+    const canvas = getCanvasByRoomID(socket.roomID);
     socket.emit('RESIZED', canvas.data);
   });
 
   socket.on('DRAW', (data) => {
-    const canvas = updateCanvas(socket.roomId, data);
+    const canvas = updateCanvas(socket.roomID, data);
     socket.broadcast.emit('DRAW', canvas);
   });
 
   socket.on('CLEAR_CANVAS', (data) => {
     console.log('Clearing Canvas');
-    clearCanvas(socket.roomId);
+    clearCanvas(socket.roomID);
     socket.broadcast.emit('CLEAR_CANVAS');
   });
 
@@ -114,7 +113,7 @@ io.on('connection', (socket) => {
 
       } else if (users.length === 0) {
         removeRoom(socket.roomID);
-        removeCanvas(socket.roomId);
+        removeCanvas(socket.roomID);
       };
 
       io.in(user.roomID).emit('MESSAGE', {

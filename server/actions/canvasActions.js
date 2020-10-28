@@ -1,23 +1,23 @@
 const canvases = [];
 
-const addCanvas = ({ roomId }) => {
+const addCanvas = ({ roomID }) => {
 
-    const canvas = { data: [], roomId };
+    const canvas = { data: [], roomID };
     canvases.push(canvas);
 
     return canvas;
 };
 
-const updateCanvas = (roomId, data) => {
-    const canvas = getCanvasByRoomId(roomId);
+const updateCanvas = (roomID, data) => {
+    const canvas = getCanvasByRoomID(roomID);
     canvas.data.push(data);
     return canvas;
 };
 
-const getCanvasByRoomId = (roomId) => canvases.filter((canvas) => canvas.roomId === roomId)[0];
+const getCanvasByRoomID = (roomID) => canvases.filter((canvas) => canvas.roomID === roomID)[0];
 
-const clearCanvas = (roomId) => {
-    let canvas = getCanvasByRoomId(roomId);
+const clearCanvas = (roomID) => {
+    let canvas = getCanvasByRoomID(roomID);
     canvas = [];
     return canvas;
 };
@@ -27,4 +27,4 @@ const removeCanvas = (id) => {
     if (index !== -1) return canvases.splice(index, 1)[0];
 };
 
-module.exports = { addCanvas, updateCanvas, getCanvasByRoomId, clearCanvas, removeCanvas };
+module.exports = { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas };

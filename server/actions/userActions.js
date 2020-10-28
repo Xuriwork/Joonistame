@@ -1,7 +1,7 @@
 const users = [];
 
-const addUser = ({ id, username, roomName }) => {
-    const user = { id, username, roomName };
+const addUser = ({ id, username, roomID }) => {
+    const user = { id, username, roomID };
     users.push(user);
 
     return { user };
@@ -13,7 +13,7 @@ const removeUser = (id) => {
 };
 
 const getUser = (id) => users.find((user) => user.id === id);
-const getAllUsersInRoom = (roomName) => users.filter((user) => user.roomName === roomName);
+const getAllUsersInRoom = (roomID) => users.filter((user) => user.roomID === roomID);
 
 const leaveAllRooms = (socket) => {
 	const rooms = socket.adapter.sids[socket.id];

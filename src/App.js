@@ -12,10 +12,10 @@ const App = () => {
 	const [info, setInfo] = useState({});
 	const [isAuthorized, setIsAuthorized] = useState(false);
 
-	const handleSetCredentials = (username, roomName) => {
+	const handleSetCredentials = (username, roomID) => {
 		username = username.trim();
-		roomName = roomName.trim();
-    	setInfo({ username, roomName });
+		roomID = roomID.trim();
+    	setInfo({ username, roomID });
 	};
 
   return (
@@ -28,7 +28,7 @@ const App = () => {
 						component={(props) => <GameRoom {...props} />}
 						setIsAuthorized={setIsAuthorized}
 						username={info.username}
-						roomName={info.roomName}
+						roomID={info.roomID}
 						isAuthorized={isAuthorized}
 					/>
 					<PublicRoute
