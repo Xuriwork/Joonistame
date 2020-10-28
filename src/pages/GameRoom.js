@@ -1,13 +1,17 @@
 import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import io from 'socket.io-client';
+import Timer from 'react-timer-wrapper';
+import Timecode from 'react-timecode';
+
 import Chat from '../components/Chat';
 import Canvas from '../components/Room/Canvas';
-
 import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
 
+
 const socketURL = 'http://localhost:5000';
+
 
 // const mockMessages = [
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
@@ -20,7 +24,7 @@ const socketURL = 'http://localhost:5000';
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
 // ];
 
-class Draw extends Component{
+class GameRoom extends Component{
     constructor(){
         super();
         this.state = {
@@ -38,7 +42,10 @@ class Draw extends Component{
             x: null, 
             y: null, 
             prevX: null, 
-            prevY: null
+            prevY: null,
+            duration: 0,
+            time: 0,
+            word: null
         }
     };
     
@@ -50,10 +57,10 @@ class Draw extends Component{
     };
     
     componentWillUnmount() {  
-		if (this.state.socket) {
-			this.state.socket.removeAllListeners();
+        if (this.state.socket) {
+            this.state.socket.removeAllListeners();
 			this.props.setIsAuthorized(false);
-		};
+        };
     };
 
     setUpCanvas = () => {
@@ -98,21 +105,11 @@ class Draw extends Component{
             context.clearRect(0, 0, width, height)
         });
 
-        socket.on('RESIZED', (board)=>{
-            for(let i = 0; i < board.length; i++){
-                this.handleDrawLine(board[i].x1, board[i].y1, board[i].x2, board[i].y2, board[i].pencilColor, board[i].pencilSize);
-            };
-        });
-
         socket.on('MESSAGE', (data) => this.setMessages(data));
 
         socket.on('USER_LEFT', (users) =>{
             this.setState({ users });
         });
-        
-        // window.addEventListener('resize', () => {
-        //     console.log('Resizing');
-        // }, false);     
     };
     
     handleStartDrawing = () => {
@@ -244,12 +241,38 @@ class Draw extends Component{
         };
     };
 
+    onTimerStart = ({duration, progress, time}) => {
+        console.log('Started', duration);
+    };
+   
+    onTimerStop = ({duration, progress, time}) => {
+        console.log('Stopped', duration);
+    };
+   
+    onTimerUpdate = ({duration, time}) => this.setState({ time, duration });
+   
+    onTimerFinish = ({duration, progress, time}) => {
+        console.log('Finished', duration);
+    };  
+
+    handleChooseWord = (word) => this.setState({ word });
+
     render() {
-        const { socket, context, users, pencilSize, messages, tool } = this.state;
+        const { socket, context, users, pencilSize, messages, tool, time, duration } = this.state;
 
         return(
             <div className='room-page'>
-                <div>
+                <div className='timer-container'>
+                    <Timer active 
+                        duration={1.5 * 60 * 1000}
+                        onTimeUpdate={this.onTimerUpdate}
+                        onFinish={this.onTimerFinish}
+                        onStart={this.onTimerStart}
+                        onStop={this.onTimerStop}
+                    />
+                    <Timecode time={duration - time} />
+                </div>
+                <div className='room-children-container'>
                     <UsersList users={users} />
                     <Canvas 
                         handleStartDrawing={this.handleStartDrawing} 
@@ -282,4 +305,4 @@ class Draw extends Component{
     }
 }
 
-export default withRouter(Draw);
+export default withRouter(GameRoom);

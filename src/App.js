@@ -5,10 +5,10 @@ import './App.scss';
 
 import { PrivateRoute, PublicRoute } from './components/Routes';
 import Join from './pages/Join';
-import Room from './pages/Room';
+import GameRoom from './pages/GameRoom';
 
 const App = () => {
-  const [info, setInfo] = useState({});
+	const [info, setInfo] = useState({});
 	const [isAuthorized, setIsAuthorized] = useState(false);
 
 	const handleSetCredentials = (username, roomName) => {
@@ -24,7 +24,7 @@ const App = () => {
 					<PrivateRoute
 						exact
 						path='/'
-						component={(props) => <Room {...props} />}
+						component={(props) => <GameRoom {...props} />}
 						setIsAuthorized={setIsAuthorized}
 						username={info.username}
 						roomName={info.roomName}

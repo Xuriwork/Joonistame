@@ -114,13 +114,26 @@
   height: 100%;
 }
 
-.room-page > div {
+.room-page > .room-children-container {
   width: 100%;
   height: 700px;
   display: flex;
   background-image: linear-gradient(to bottom, #525E94, #323b68);
   border-radius: 10px;
   border: solid 2px rgb(236, 236, 236);
+}
+
+.timer-container {
+  @extend %flex-complete-center-column;
+  background-color: #5b6bb4;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-weight: 600;
+  position: relative;
+  top: 26px;
+  z-index: 2;
+  box-shadow: #98a3db 0px 1px 4px, #98a3db 0px 0px 0px 3px;
 }
 
 .canvas-container {
@@ -135,6 +148,8 @@
   canvas {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
     display: block;
     cursor: url("./assets/icons/drawer-pencil.svg") 0 20, default;
 
