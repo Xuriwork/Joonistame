@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
 import './App.scss';
 
 import { PrivateRoute, PublicRoute } from './components/Routes';
+import CharacterEditor from './components/CharacterEditor/CharacterEditor.js';
 import Join from './pages/Join';
 import GameRoom from './pages/GameRoom';
 
@@ -38,6 +39,7 @@ const App = () => {
 						setIsAuthorized={setIsAuthorized}
 						handleSetCredentials={handleSetCredentials}
 					/>
+					<PublicRoute path='/character-editor' component={CharacterEditor} />
 					<Redirect from='/**' to='/join' />
 				</Switch>
 			</Router>

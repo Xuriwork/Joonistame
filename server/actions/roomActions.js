@@ -1,7 +1,7 @@
 const rooms = [];
 
-const addRoom = ({ drawer, name, roomId }) => {
-    const room = { drawer, name, roomId, queue: [], maxRoomSize: 20 };
+const addRoom = ({ drawer, roomId }) => {
+    const room = { drawer, roomId, queue: [], maxRoomSize: 20 };
     rooms.push(room);
 
     return room;
@@ -12,7 +12,6 @@ const removeRoom = (id) => {
     if (index !== -1) return rooms.splice(index, 1)[0];
 };
 
-const getRoomByName = (roomName) => rooms.filter((room) => room.name === roomName)[0];
 const getRoomByRoomId = (roomId) => rooms.filter((room) => room.roomId === roomId)[0];
 
-module.exports = { addRoom, getRoomByName, removeRoom, getRoomByRoomId };
+module.exports = { addRoom, removeRoom, getRoomByRoomId };
