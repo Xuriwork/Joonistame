@@ -79,12 +79,11 @@ class GameRoom extends Component{
     };
 
     onSocketMethods = (socket) => {
-
-        const { roomID, username } = this.props;
+        const { roomID, username, userCharacter } = this.props;
         const { context, width, height } = this.state;
         
         socket.on('connect', () => {
-			socket.emit('JOIN', { roomID, username });
+			socket.emit('JOIN', { roomID, username, userCharacter });
 		});
         
         socket.on('GET_USERS', (users) => this.setState({ users }));

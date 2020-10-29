@@ -6,8 +6,6 @@ const Canvas = ({ handleUseBucket, handleStartDrawing, handleEndDrawing, handleD
         className = 'paint_bucket_white';
     };
 
-    console.log(className);
-
     return (
         <div className='canvas-container' ref={canvasContainer}>
             <canvas 

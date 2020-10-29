@@ -7,10 +7,12 @@ import { PrivateRoute, PublicRoute } from './components/Routes';
 import CharacterEditor from './components/CharacterEditor/CharacterEditor.js';
 import Join from './pages/Join';
 import GameRoom from './pages/GameRoom';
+import Lobby from './pages/Lobby';
 
 const App = () => {
 	const [info, setInfo] = useState({});
 	const [isAuthorized, setIsAuthorized] = useState(false);
+	const [userCharacter, setUserCharacter] = useState('');
 
 	const handleSetCredentials = (username, roomID) => {
 		username = username.trim();
@@ -29,6 +31,15 @@ const App = () => {
 						setIsAuthorized={setIsAuthorized}
 						username={info.username}
 						roomID={info.roomID}
+						userCharacter={userCharacter}
+						isAuthorized={isAuthorized}
+					/>
+					<PrivateRoute
+						exact
+						path='/lobby'
+						component={(props) => <Lobby {...props} />} 
+						roomID={info.roomID}
+						setIsAuthorized={setIsAuthorized}
 						isAuthorized={isAuthorized}
 					/>
 					<PublicRoute
@@ -38,8 +49,10 @@ const App = () => {
 						restricted={true}
 						setIsAuthorized={setIsAuthorized}
 						handleSetCredentials={handleSetCredentials}
+						setUserCharacter={setUserCharacter}
+						userCharacter={userCharacter}
 					/>
-					<PublicRoute path='/character-editor' component={CharacterEditor} />
+					<PublicRoute path='/character-editor' component={(props) => <CharacterEditor {...props} />}  setUserCharacter={setUserCharacter} />
 					<Redirect from='/**' to='/join' />
 				</Switch>
 			</Router>

@@ -41,12 +41,11 @@ const settingMaps = {
 	lashes: { true: 'true', false: 'false' },
 };
 
-const CharacterEditor = () => {
+const CharacterEditor = ({ setUserCharacter }) => {
 	const history = useHistory();
 	const location = useLocation();
 	
-	const props = useMemo(
-		() => (location.search ? qs.parse(location.search) : getRandomOptions()),
+	const props = useMemo(() => (location.search ? qs.parse(location.search) : getRandomOptions()),
 		[location.search]
 	);
 
@@ -83,7 +82,9 @@ const CharacterEditor = () => {
 	);
 
 	const handleSaveCharacter = () => {
-		console.log(`https://bigheads.io${svgUrl}`);
+		setUserCharacter(`https://bigheads.io${svgUrl}`);
+		console.log(`https://bigheads.io${svgUrl}`)
+		history.push('/join');
 	};
 
 	return (

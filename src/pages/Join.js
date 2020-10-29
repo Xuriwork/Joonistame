@@ -1,27 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { customAlphabet } from 'nanoid/non-secure';
+import io from 'socket.io-client';
+import axios from 'axios';
+import qs from 'query-string';
+
 import { validateJoinRoomData } from '../utils/validators';
+import { getRandomOptions } from '../components/CharacterEditor/getRandomOptions';
+import { isEmpty } from 'lodash';
 
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 20);
+const socketURL = 'http://localhost:5000';
+const socket = io(socketURL);
 
-const Join = ({ setIsAuthorized, handleSetCredentials }) => {
+const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCharacter }) => {
     const history = useHistory();
     const [username, setUsername] = useState('');
     const [roomID, setRoomID] = useState('');
-    const [errors, setErrors] = useState({});
+	const [errors, setErrors] = useState({});
+	
+	useEffect(() => {
+		const handleGenerateRandomCharacter = () => {
+			const url = `/character-editor?${qs.stringify(getRandomOptions())}`;
+			return `https://bigheads.io/svg?${url}`
+		};
+		setUserCharacter(handleGenerateRandomCharacter());
+	}, [setUserCharacter]);
 
     const handleOnChangeRoomID = (e) => setRoomID(e.target.value);
     const handleOnChangeUsername = (e) => setUsername(e.target.value);
-
-    const handleGenerateRandomRoomID = (e) => setRoomID(createRandomRoomID(e));
-
-	const createRandomRoomID = (e) => {
-        e.preventDefault();
-		const randomId = nanoid();
-		const formatedStringId = randomId.substring(0,5) + '-' + randomId.substring(5, 10) + '-' + randomId.substring(10, 15) + '-' + randomId.substring(15, 20);
-		return formatedStringId;
-    };
     
     const handleJoinRoom = (e) => {
         e.preventDefault();
@@ -34,23 +39,30 @@ const Join = ({ setIsAuthorized, handleSetCredentials }) => {
         history.push('/');
     };
 
+	const handleCreateRoom = (e) => {
+		e.preventDefault();
+
+		if (isEmpty(username)) {
+			return setErrors({ username: 'This field is required' });
+		};
+		
+		axios.post('http://localhost:5000/create-room', {
+			socketID: socket.id
+		})
+		.then((response) => {
+			handleSetCredentials(username, response.data.roomID);
+			setIsAuthorized(true);
+			history.push('/');
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+	};
+
     return (
 			<div className='join-page'>
 				<form>
-					<label htmlFor='roomID'>Room ID</label>
-					<input
-						type='text'
-						id='roomID'
-						onChange={handleOnChangeRoomID}
-						value={roomID}
-						className={errors.roomID && 'has-error'}
-					/>
-					{errors.roomID && (
-						<span className='error-message'>{errors.roomID}</span>
-					)}
-					<button onClick={handleGenerateRandomRoomID}>
-						Generate Random Room ID
-					</button>
+					<img src={userCharacter} alt='User Character' />
 					<label htmlFor='username'>Username</label>
 					<input
 						type='text'
@@ -62,9 +74,24 @@ const Join = ({ setIsAuthorized, handleSetCredentials }) => {
 					{errors.username && (
 						<span className='error-message'>{errors.username}</span>
 					)}
+					<label htmlFor='roomID'>Room ID</label>
+					<input
+						type='text'
+						id='roomID'
+						onChange={handleOnChangeRoomID}
+						value={roomID}
+						className={errors.roomID && 'has-error'}
+					/>
+					{errors.roomID && (
+						<span className='error-message'>{errors.roomID}</span>
+					)}
 					<button className='join-button' onClick={handleJoinRoom}>
 						Join
 					</button>
+					<span className='strike'>
+						Or
+					</span>
+					<button onClick={handleCreateRoom}>Create Room</button>
 				</form>
 			</div>
 		);

@@ -14,4 +14,4 @@ const removeRoom = (id) => {
 
 const getRoomByRoomID = (roomID) => rooms.filter((room) => room.roomID === roomID)[0];
 
-module.exports = { addRoom, removeRoom, getRoomByRoomID };
+module.exports = { rooms, addRoom, removeRoom, getRoomByRoomID };

@@ -13,9 +13,7 @@ const colors = [
 
 const ColorPalette = ({ handleChangeColor }) => {
 	
-	const onChange = (e) => {
-		console.log(e);
-	};
+	const onChange = (e) => handleChangeColor(e.target.value);
 	
 	return (
 		<div className='color-palette'>
