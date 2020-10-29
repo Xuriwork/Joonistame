@@ -39,6 +39,7 @@ const App = () => {
 						path='/lobby'
 						component={(props) => <Lobby {...props} />} 
 						roomID={info.roomID}
+						username={info.username}
 						setIsAuthorized={setIsAuthorized}
 						isAuthorized={isAuthorized}
 					/>

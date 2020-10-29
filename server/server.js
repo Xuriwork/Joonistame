@@ -8,7 +8,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, removeUser, getAllUsersInRoom, getUser } = require('./actions/userActions');
+const { addUser, removeUser, getAllUsersInRoom, checkIfNameExistsInRoom, getUser } = require('./actions/userActions');
 const { rooms, addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 
@@ -31,8 +31,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.post('/create-room', (req, res) => {
 
   const socketID = req.body.socketID;
-  console.log('socketID', socketID);
-  console.log('rooms', rooms);
+  const username = req.body.username;
+  const userCharacter = req.body.userCharacter;
 
   const createRandomRoomID = (e) => {
     const randomId = nanoid();
@@ -43,13 +43,16 @@ app.post('/create-room', (req, res) => {
   const roomID = createRandomRoomID();
 
   const room = getRoomByRoomID(roomID);
-
-  console.log('room', room);
-
+  
   if (!room) {
     addRoom({ drawer: socketID, roomID });
     addCanvas({ roomID });
     console.log('Added');
+  };
+  
+  const user = checkIfNameExistsInRoom(roomID, username);
+  if (!user) {
+    addUser({ id: socketID, username, roomID, userCharacter });
   };
 
   return res.status(201).json({ roomID });

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-const Lobby = ({ roomID }) => {
+const Lobby = ({ roomID, username }) => {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {

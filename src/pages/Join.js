@@ -47,11 +47,12 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 		};
 		
 		axios.post('http://localhost:5000/create-room', {
-			socketID: socket.id
+			socketID: socket.id,
+			username,
+			userCharacter
 		})
 		.then((response) => {
 			handleSetCredentials(username, response.data.roomID);
-			setIsAuthorized(true);
 			history.push('/');
 		})
 		.catch((error) => {

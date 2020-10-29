@@ -3,7 +3,6 @@ const users = [];
 const addUser = ({ id, username, roomID }) => {
     const user = { id, username, roomID };
     users.push(user);
-
     return { user };
 };
 
@@ -22,4 +21,10 @@ const leaveAllRooms = (socket) => {
 	});
 };
 
-module.exports = { addUser, removeUser, getUser, getAllUsersInRoom, leaveAllRooms };
+const checkIfNameExistsInRoom = (roomID, username) => {
+    const room = getAllUsersInRoom(roomID);
+    const user = room.filter((user) => user.username === username)[0];
+    return user;
+};
+
+module.exports = { addUser, removeUser, getUser, checkIfNameExistsInRoom, getAllUsersInRoom, leaveAllRooms };

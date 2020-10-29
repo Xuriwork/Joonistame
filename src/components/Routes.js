@@ -14,7 +14,7 @@ export const PrivateRoute = ({ component: Component, isAuthorized, ...rest }) =>
 export const PublicRoute = ({ component: Component, restricted, isAuthorized, ...rest }) => {
     return (
         <Route {...rest} render={() => (
-            isAuthorized && restricted ? <Redirect to='/menu' /> : <Component {...rest} />
+            isAuthorized && restricted ? <Redirect to='/' /> : <Component {...rest} />
         )} />
     );
 };
