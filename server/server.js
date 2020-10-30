@@ -9,7 +9,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
 const { addUser, removeUser, getAllUsersInRoom, checkIfNameExistsInRoom, getUser } = require('./actions/userActions');
-const { rooms, addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
+const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 
 const PORT = process.env.PORT || 5000;
@@ -29,7 +29,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // });
 
 app.post('/create-room', (req, res) => {
-
   const socketID = req.body.socketID;
   const username = req.body.username;
   const userCharacter = req.body.userCharacter;
@@ -41,9 +40,7 @@ app.post('/create-room', (req, res) => {
   };
 
   const roomID = createRandomRoomID();
-
   const room = getRoomByRoomID(roomID);
-  
   if (!room) {
     addRoom({ drawer: socketID, roomID });
     addCanvas({ roomID });
@@ -58,20 +55,33 @@ app.post('/create-room', (req, res) => {
   return res.status(201).json({ roomID });
 });
 
-app.post('/get-lobby/:roomID', (req, res) => {
-
+app.post('/join-room/:roomID', (req, res) => {
   const roomID = req.params.roomID;
-  console.log('roomID', roomID);
-  console.log('rooms', rooms);
-
+  console.log(roomID);
+  const socketID = req.body.socketID;
+  const userCharacter = req.body.userCharacter;
+  const username = req.body.username;
+  
+  const user = checkIfNameExistsInRoom(roomID, username);
+  if (!user) {
+    console.log(socketID, username, roomID, userCharacter);
+    addUser({ id: socketID, username, roomID, userCharacter });
+  };
+  
   const users = getAllUsersInRoom(roomID);
-
   console.log(users);
 
   return res.status(201).json({ users });
 });
 
 io.on('connection', (socket) => {
+
+  socket.on('JOINED_LOBBY', (roomID) => {
+    const users = getAllUsersInRoom(roomID);
+    console.log(roomID);
+    console.log(users);
+    io.in(roomID).emit('GET_USERS', users);
+  });
 
   socket.on('JOIN', ({ username, roomID, userCharacter }) => {
     console.log('New user connected', username, socket.id, roomID);
@@ -120,6 +130,16 @@ io.on('connection', (socket) => {
     io.in(roomID).emit('GET_USERS', users);
   });
 
+  socket.on('SET_WORD', (word) => {
+    const splitWord = word.split('');
+
+    const hiddenWord = [];
+    splitWord.forEach(() => hiddenWord.push('_'));
+
+    socket.emit('SET_WORD', word);
+    socket.to(socket.roomID).emit('SET_WORD', hiddenWord);
+  });
+
   socket.on('RESIZED', () => {
     const canvas = getCanvasByRoomID(socket.roomID);
     socket.emit('RESIZED', canvas.data);
@@ -146,6 +166,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+
+    const test = true;
+    if (test) return;
+    
     const user = removeUser(socket.id);
 
     if (user) {

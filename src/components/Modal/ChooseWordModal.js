@@ -1,17 +1,17 @@
-import { useEffect } from "react";
-import { generateRandomNoun } from "../../utils/chooseRandomWord";
+import { useEffect, useState } from 'react';
+import { generateRandomNoun } from '../../utils/chooseRandomWord';
 
 const ChooseWordModal = ({ handleChooseWord }) => {
-    const [words, setWords] = [];
+    const [words, setWords] = useState([]);
 
     useEffect(() => setWords(generateRandomNoun()), [setWords]);
     
     return (
-        <div className='modal'>
-            <div>
+        <div className='modal-overlay'>
+            <div className='modal'>
                 {
                     words.map((word) => (
-                        <button onClick={handleChooseWord}>{word}</button>
+                        <button key={word} onClick={() => handleChooseWord(word)}>{word}</button>
                     ))
                 }
             </div>

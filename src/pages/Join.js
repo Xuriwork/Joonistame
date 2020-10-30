@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import io from 'socket.io-client';
 import axios from 'axios';
 import qs from 'query-string';
 
 import { validateJoinRoomData } from '../utils/validators';
 import { getRandomOptions } from '../components/CharacterEditor/getRandomOptions';
 import { isEmpty } from 'lodash';
-
-const socketURL = 'http://localhost:5000';
-const socket = io(socketURL);
+import { useSocket } from '../context/SocketContext';
 
 const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCharacter }) => {
     const history = useHistory();
     const [username, setUsername] = useState('');
     const [roomID, setRoomID] = useState('');
 	const [errors, setErrors] = useState({});
+	const socket = useSocket();
 	
 	useEffect(() => {
 		const handleGenerateRandomCharacter = () => {
@@ -36,28 +34,52 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
         
         handleSetCredentials(username, roomID);
         setIsAuthorized(true);
-        history.push('/');
-    };
+        history.push('/room');
+	};
+	
+	// const handleJoinRoom = async (e) => {
+    //     e.preventDefault();
+    //     const { valid, errors } = validateJoinRoomData(username, roomID);
+        
+	// 	if (!valid) return setErrors(errors);
 
-	const handleCreateRoom = (e) => {
+	// 	await handleSetCredentials(username, roomID);
+	// 	await setIsAuthorized(true);
+
+	// 	await axios.post(`http://localhost:5000/join-room/${roomID}`, {
+	// 		roomID,
+	// 		socketID: socket.id,
+	// 		username,
+	// 		userCharacter
+	// 	})
+	// 	.catch((error) => {
+	// 		console.log(error);
+	// 	});
+
+    //     history.push('/lobby');
+    // };
+
+	const handleCreateRoom = async (e) => {
 		e.preventDefault();
 
 		if (isEmpty(username)) {
 			return setErrors({ username: 'This field is required' });
 		};
 		
-		axios.post('http://localhost:5000/create-room', {
+		await axios.post('http://localhost:5000/create-room', {
 			socketID: socket.id,
 			username,
 			userCharacter
 		})
 		.then((response) => {
 			handleSetCredentials(username, response.data.roomID);
-			history.push('/');
+			setIsAuthorized(true);
 		})
 		.catch((error) => {
 			console.log(error);
 		});
+
+		history.push('/lobby');
 	};
 
     return (

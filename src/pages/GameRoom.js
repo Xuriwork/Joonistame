@@ -1,17 +1,14 @@
 import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import io from 'socket.io-client';
 import Timer from 'react-timer-wrapper';
 import Timecode from 'react-timecode';
+import { SocketContext } from '../context/SocketContext'
 
 import Chat from '../components/Chat';
 import Canvas from '../components/Room/Canvas';
 import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
-
-
-const socketURL = 'http://localhost:5000';
-
+import ChooseWordModal from '../components/Modal/ChooseWordModal';
 
 // const mockMessages = [
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
@@ -25,10 +22,11 @@ const socketURL = 'http://localhost:5000';
 // ];
 
 class GameRoom extends Component{
+    static contextType = SocketContext;
+    
     constructor(){
         super();
         this.state = {
-            socket: null,
             drawer: null,
             users: [],
             messages: [],
@@ -43,13 +41,15 @@ class GameRoom extends Component{
             y: null, 
             prevX: null, 
             prevY: null,
-            duration: 0,
+            duration: 90000,
+            isTimerActive: false,
             time: 0,
-            word: null
+            word: null,
         }
     };
     
     componentDidMount() {
+        console.log(this.context.socket);
         const { isAuthorized, history } = this.props;
         if (!isAuthorized) return history.push('/join');
         
@@ -57,8 +57,10 @@ class GameRoom extends Component{
     };
     
     componentWillUnmount() {  
-        if (this.state.socket) {
-            this.state.socket.removeAllListeners();
+        console.log(this.context.socket);
+
+        if (this.context.socket) {
+            this.context.socket.removeAllListeners();
 			this.props.setIsAuthorized(false);
         };
     };
@@ -69,13 +71,7 @@ class GameRoom extends Component{
         this.setState({ context: this.canvas.getContext('2d'), width, height })
         this.canvas.width = width;
         this.canvas.height = height;
-        this.connect();
-    };
-
-    connect = () => {
-        const socket = io(socketURL);
-        this.setState({ socket });
-        this.onSocketMethods(socket);
+        this.onSocketMethods(this.context.socket);
     };
 
     onSocketMethods = (socket) => {
@@ -90,6 +86,8 @@ class GameRoom extends Component{
 
         socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
 
+        socket.on('SET_WORD', (word) => this.setState({ word }));
+
         socket.on('GET_CANVAS', (canvas) => {
             for(let i = 0; i < canvas.length; i++){
                 this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].pencilColor, canvas[i].pencilSize);
@@ -97,6 +95,7 @@ class GameRoom extends Component{
         });
 
         socket.on('DRAW', (data) => {
+            console.log(data)
             this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
@@ -117,7 +116,8 @@ class GameRoom extends Component{
     };
 
     handleDrawing = (e) => {
-        const { drawing, prevX, prevY, tool, pencilColor, pencilSize, socket } = this.state;
+        const { drawing, prevX, prevY, tool, pencilColor, pencilSize } = this.state;
+        const { socket } = this.context;
 
         if (tool === 'Paint Bucket') return;
 
@@ -148,7 +148,8 @@ class GameRoom extends Component{
     };
 
     handleEndDrawing = () => {
-        const { drawer, socket } = this.state;
+        const { socket } = this.context;
+        const { drawer } = this.state;
         if (drawer !== socket.id) return;
 
         this.setState({ drawing: false });
@@ -191,7 +192,7 @@ class GameRoom extends Component{
     };
 
     handleClearCanvas = () => {
-        this.state.socket.emit('CLEAR_CANVAS');
+        this.context.socket.emit('CLEAR_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
     };
 
@@ -225,7 +226,7 @@ class GameRoom extends Component{
     };
     
     sendMessage = (message) => {
-		this.state.socket.emit('SEND_MESSAGE', {
+		this.context.socket.emit('SEND_MESSAGE', {
 			content: message,
 			username: this.props.username,
 		});
@@ -254,16 +255,22 @@ class GameRoom extends Component{
         console.log('Finished', duration);
     };  
 
-    handleChooseWord = (word) => this.setState({ word });
+    handleChooseWord = (word) => {
+        const { socket } = this.context;
+        socket.emit('SET_WORD', word);
+    };
 
     render() {
-        const { socket, context, users, pencilSize, messages, tool, time, duration } = this.state;
+        const { socket, context, users, pencilSize, messages, tool, time, duration, isTimerActive, word } = this.state;
 
         return(
             <div className='room-page'>
+                <div>
+                    {word}
+                </div>
                 <div className='timer-container'>
-                    <Timer active 
-                        duration={1.5 * 60 * 1000}
+                    <Timer active={isTimerActive} 
+                        duration={90000}
                         onTimeUpdate={this.onTimerUpdate}
                         onFinish={this.onTimerFinish}
                         onStart={this.onTimerStart}
@@ -299,6 +306,7 @@ class GameRoom extends Component{
                         />
                     </div>
                 </div>
+                <ChooseWordModal handleChooseWord={this.handleChooseWord} />
             </div>
         )
     }
