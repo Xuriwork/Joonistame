@@ -1,14 +1,18 @@
 import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import io from 'socket.io-client';
 import Timer from 'react-timer-wrapper';
 import Timecode from 'react-timecode';
-import { SocketContext } from '../context/SocketContext'
 
 import Chat from '../components/Chat';
 import Canvas from '../components/Room/Canvas';
 import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
 import ChooseWordModal from '../components/Modal/ChooseWordModal';
+
+
+const socketURL = 'http://localhost:5000';
+
 
 // const mockMessages = [
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
@@ -22,8 +26,6 @@ import ChooseWordModal from '../components/Modal/ChooseWordModal';
 // ];
 
 class GameRoom extends Component{
-    static contextType = SocketContext;
-    
     constructor(){
         super();
         this.state = {
@@ -44,12 +46,11 @@ class GameRoom extends Component{
             duration: 90000,
             isTimerActive: false,
             time: 0,
-            word: null,
+            word: null
         }
     };
     
     componentDidMount() {
-        console.log(this.context.socket);
         const { isAuthorized, history } = this.props;
         if (!isAuthorized) return history.push('/join');
         
@@ -57,11 +58,8 @@ class GameRoom extends Component{
     };
     
     componentWillUnmount() {  
-        console.log(this.context.socket);
-
-        if (this.context.socket) {
-            this.context.socket.removeAllListeners();
-			this.props.setIsAuthorized(false);
+        if (this.state.socket) {
+            this.state.socket.removeAllListeners();
         };
     };
 
@@ -71,7 +69,13 @@ class GameRoom extends Component{
         this.setState({ context: this.canvas.getContext('2d'), width, height })
         this.canvas.width = width;
         this.canvas.height = height;
-        this.onSocketMethods(this.context.socket);
+        this.connect();
+    };
+
+    connect = () => {
+        const socket = io(socketURL);
+        this.setState({ socket });
+        this.onSocketMethods(socket);
     };
 
     onSocketMethods = (socket) => {
@@ -86,7 +90,9 @@ class GameRoom extends Component{
 
         socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
 
-        socket.on('SET_WORD', (word) => this.setState({ word }));
+        socket.on('SET_WORD', (word) => {
+            this.setState({ word, isTimerActive: true });
+        });
 
         socket.on('GET_CANVAS', (canvas) => {
             for(let i = 0; i < canvas.length; i++){
@@ -116,8 +122,7 @@ class GameRoom extends Component{
     };
 
     handleDrawing = (e) => {
-        const { drawing, prevX, prevY, tool, pencilColor, pencilSize } = this.state;
-        const { socket } = this.context;
+        const { drawing, prevX, prevY, tool, pencilColor, pencilSize, socket } = this.state;
 
         if (tool === 'Paint Bucket') return;
 
@@ -148,8 +153,7 @@ class GameRoom extends Component{
     };
 
     handleEndDrawing = () => {
-        const { socket } = this.context;
-        const { drawer } = this.state;
+        const { drawer, socket } = this.state;
         if (drawer !== socket.id) return;
 
         this.setState({ drawing: false });
@@ -192,7 +196,7 @@ class GameRoom extends Component{
     };
 
     handleClearCanvas = () => {
-        this.context.socket.emit('CLEAR_CANVAS');
+        this.state.socket.emit('CLEAR_CANVAS');
         this.state.context.clearRect(0, 0, this.state.width, this.state.height);
     };
 
@@ -226,7 +230,7 @@ class GameRoom extends Component{
     };
     
     sendMessage = (message) => {
-		this.context.socket.emit('SEND_MESSAGE', {
+		this.state.socket.emit('SEND_MESSAGE', {
 			content: message,
 			username: this.props.username,
 		});
@@ -256,18 +260,22 @@ class GameRoom extends Component{
     };  
 
     handleChooseWord = (word) => {
-        const { socket } = this.context;
-        socket.emit('SET_WORD', word);
+        const splitWord = word.split('');
+
+        const hiddenWord = [];
+        splitWord.forEach(() => hiddenWord.push('_'));
+
+        this.state.socket.emit('SET_WORD', word);
     };
 
     render() {
-        const { socket, context, users, pencilSize, messages, tool, time, duration, isTimerActive, word } = this.state;
+        const { socket, context, users, pencilSize, messages, tool, time, duration, isTimerActive, word, drawer } = this.state;
 
         return(
             <div className='room-page'>
-                <div>
+                <h2>
                     {word}
-                </div>
+                </h2>
                 <div className='timer-container'>
                     <Timer active={isTimerActive} 
                         duration={90000}
@@ -306,7 +314,9 @@ class GameRoom extends Component{
                         />
                     </div>
                 </div>
-                <ChooseWordModal handleChooseWord={this.handleChooseWord} />
+                {socket && socket.id === drawer && !isTimerActive && (
+							<ChooseWordModal handleChooseWord={this.handleChooseWord} />
+						)}
             </div>
         )
     }

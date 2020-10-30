@@ -1,5 +1,6 @@
 import { useEffect, createContext, useState, useContext } from 'react';
 import io from 'socket.io-client';
+import Loading from '../components/Loading';
 
 const SocketContext = createContext();
 
@@ -11,11 +12,9 @@ export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     useEffect(() => setSocket(_socket), []);
 
-    console.log(socket);
-    
     return (
         <SocketContext.Provider 
-        value={socket}>
+        value={{ socket }}>
             {children}
         </SocketContext.Provider>
     )

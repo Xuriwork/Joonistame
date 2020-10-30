@@ -13,7 +13,7 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
     const [username, setUsername] = useState('');
     const [roomID, setRoomID] = useState('');
 	const [errors, setErrors] = useState({});
-	const socket = useSocket();
+	const { socket } = useSocket();
 	
 	useEffect(() => {
 		const handleGenerateRandomCharacter = () => {

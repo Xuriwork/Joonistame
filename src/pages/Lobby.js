@@ -4,7 +4,7 @@ import { ReactComponent as ClipboardIcon } from '../assets/icons/clipboard-line.
 
 const Lobby = ({ roomID }) => {
     const [users, setUsers] = useState([]);
-    const socket = useSocket();
+    const { socket } = useSocket();
 
     console.log('Mounted');
 
