@@ -623,6 +623,13 @@
   background-color: #ec570d;
 }
 
+.SERVER-GUESSED_CORRECT_WORD {
+  @extend %SERVER_MESSAGE;
+  background-image: none;
+  background-color: #e6c15e;
+  color: #000000;
+}
+
 .lobby-page {
   width: 100%;
 

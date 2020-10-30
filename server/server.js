@@ -98,9 +98,6 @@ io.on('connection', (socket) => {
 
     const room = getRoomByRoomID(roomID);
     
-    console.log(socket.id);
-    console.log(users);
-
     if (!room) {
       addRoom({ drawer: users[0].id, roomID });
       addCanvas({ roomID });
@@ -163,11 +160,13 @@ io.on('connection', (socket) => {
   socket.on('SEND_MESSAGE', (data) => {
     const room = getRoomByRoomID(socket.roomID);
 
-    console.log(data);
-    
     if (data.content.toLowerCase() === room.word.toLowerCase()) {
       console.log(data.content);
-      return
+      io.in('game').emit('big-announcement', 'the game will start soon');
+      return socket.emit('MESSAGE', {
+        type: 'SERVER-GUESSED_CORRECT_WORD',
+        content: `You guessed it! 👏`,
+      });
     };
 
     const user = getUser(socket.id);
