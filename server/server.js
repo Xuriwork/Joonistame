@@ -162,8 +162,10 @@ io.on('connection', (socket) => {
 
   socket.on('SEND_MESSAGE', (data) => {
     const room = getRoomByRoomID(socket.roomID);
+
+    console.log(data);
     
-    if (data.content.toLowercase() === room.word.toLowercase()) {
+    if (data.content.toLowerCase() === room.word.toLowerCase()) {
       console.log(data.content);
       return
     };

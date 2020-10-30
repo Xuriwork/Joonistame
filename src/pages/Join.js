@@ -26,38 +26,38 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
     const handleOnChangeRoomID = (e) => setRoomID(e.target.value);
     const handleOnChangeUsername = (e) => setUsername(e.target.value);
     
-    // const handleJoinRoom = (e) => {
-    //     e.preventDefault();
-    //     const { valid, errors } = validateJoinRoomData(username, roomID);
-        
-	// 	if (!valid) return setErrors(errors);
-        
-    //     handleSetCredentials(username, roomID);
-    //     setIsAuthorized(true);
-    //     history.push('/room');
-	// };
-	
-	const handleJoinRoom = async (e) => {
+    const handleJoinRoom = (e) => {
         e.preventDefault();
         const { valid, errors } = validateJoinRoomData(username, roomID);
         
 		if (!valid) return setErrors(errors);
+        
+        handleSetCredentials(username, roomID);
+        setIsAuthorized(true);
+        history.push('/room');
+	};
+	
+	// const handleJoinRoom = async (e) => {
+    //     e.preventDefault();
+    //     const { valid, errors } = validateJoinRoomData(username, roomID);
+        
+	// 	if (!valid) return setErrors(errors);
 
-		await handleSetCredentials(username, roomID);
-		await setIsAuthorized(true);
+	// 	await handleSetCredentials(username, roomID);
+	// 	await setIsAuthorized(true);
 
-		await axios.post(`http://localhost:5000/join-room/${roomID}`, {
-			roomID,
-			socketID: socket.id,
-			username,
-			userCharacter
-		})
-		.catch((error) => {
-			console.log(error);
-		});
+	// 	await axios.post(`http://localhost:5000/join-room/${roomID}`, {
+	// 		roomID,
+	// 		socketID: socket.id,
+	// 		username,
+	// 		userCharacter
+	// 	})
+	// 	.catch((error) => {
+	// 		console.log(error);
+	// 	});
 
-        history.push('/lobby');
-    };
+    //     history.push('/lobby');
+    // };
 
 	const handleCreateRoom = async (e) => {
 		e.preventDefault();
