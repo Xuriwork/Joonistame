@@ -73,7 +73,11 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 			return setErrors({ username: 'This field is required' });
 		};
 
-		await axios.post('http://localhost:5000/create-room')
+		await axios.post('http://localhost:5000/create-room', {
+			socketID: socket.id,
+			username,
+			userCharacter
+		})
 		.then((response) => {
 			addRoom({ variables: { id: socket.id, username, roomID: response.data.roomID, userCharacter } });
 			handleSetCredentials(username, roomID);
