@@ -640,6 +640,7 @@
 
 .lobby-page {
   width: 100%;
+  height: 100%;
 
   .heading {
     @extend %flex-complete-center-row;
@@ -661,10 +662,12 @@
   }
 
   .lobby-list {
+    @extend %flex-complete-center-row;
     padding: 10px;
     box-sizing: border-box;
     width: 100%;
-    @extend %flex-complete-center-row;
+    height: 100%;
+    flex-wrap: wrap;
 
     li {
       width: 120px;
