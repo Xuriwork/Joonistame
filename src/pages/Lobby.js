@@ -1,17 +1,29 @@
-import { useQuery } from '@apollo/client';
-import { GET_USERS } from '../utils/Apollo/Query';
+import { useEffect, useState } from 'react';
 import { ReactComponent as ClipboardIcon } from '../assets/icons/clipboard-line.svg';
+import { useSocket } from '../context/SocketContext';
 
 const Lobby = ({ roomID }) => {
+    const [users, setUsers] = useState([]);
+    const { socket } = useSocket();
+
     console.log('Mounted');
-    
-    const { loading, error, data } = useQuery(GET_USERS, { variables: { roomID } });
-    //const { loading, error, data } = useQuery(GET_USERS);
 
-    if (loading) return <div>Loading</div>;
-    if (error) return console.log(error);
+    useEffect(() => {
+        
+        const connect = () => {
 
-    console.log(data);
+            console.log(roomID);
+            socket.emit('JOINED_LOBBY', roomID);
+            socket.on('GET_USERS', (users) => {
+                console.log(users);
+                setUsers(users);
+            });
+        };
+
+        connect();
+
+    }, [roomID, socket]);
+
 
     const copyToClipboard = () => {
 		navigator.clipboard.writeText(roomID).then(() => {
@@ -27,7 +39,7 @@ const Lobby = ({ roomID }) => {
             </div>
             <ul className='lobby-list'>
                 {
-                    data.queryUser.map((user) => (
+                    users.map((user) => (
                         <li key={user.id}>
                             <img src={user.userCharacter} alt='User Character' />
                             <span>{user.username}</span>

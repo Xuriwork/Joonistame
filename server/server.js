@@ -55,37 +55,72 @@ app.post('/create-room', (req, res) => {
   return res.status(201).json({ roomID });
 });
 
-app.post('/join-room/:roomID', (req, res) => {
-  const roomID = req.params.roomID;
-  console.log(roomID);
-  const socketID = req.body.socketID;
-  const userCharacter = req.body.userCharacter;
-  const username = req.body.username;
-  
-  const user = checkIfNameExistsInRoom(roomID, username);
-  if (!user) {
-    console.log(socketID, username, roomID, userCharacter);
-    addUser({ id: socketID, username, roomID, userCharacter });
-  };
-  
-  const users = getAllUsersInRoom(roomID);
-  console.log(users);
 
-  return res.status(201).json({ users });
-});
+const createRandomRoomID = () => {
+  const randomId = nanoid();
+  const formatedStringId = randomId.substring(0,5) + '-' + randomId.substring(5, 10) + '-' + randomId.substring(10, 15) + '-' + randomId.substring(15, 20);
+  return formatedStringId;
+};
 
 io.on('connection', (socket) => {
+
+  socket.on('JOIN_LOBBY', ({ roomID, userCharacter, username }, callback) => {
+
+    const user = checkIfNameExistsInRoom(roomID, username);
+
+    if (!user) {
+      addUser({ id: socket.id, username, roomID, userCharacter });
+      socket.join(roomID);
+      callback(true);
+    } else {
+      callback(false, 'Name is already in use');
+      return;
+    };
+  });
+
+  socket.on('CREATE_LOBBY', ({ userCharacter, username }, callback) => {
+
+    const roomID = createRandomRoomID();
+    const room = getRoomByRoomID(roomID);
+    if (!room) {
+      addRoom({ drawer: socket.id, roomID });
+      addUser({ id: socket.id, username, roomID, userCharacter });
+      addCanvas({ roomID });
+      console.log('Added');
+      callback(roomID);
+    };
+  });
+
+  app.post('/join-room/:roomID', (req, res) => {
+    const roomID = req.params.roomID;
+    console.log(roomID);
+    const socketID = req.body.socketID;
+    const userCharacter = req.body.userCharacter;
+    const username = req.body.username;
+    
+    const user = checkIfNameExistsInRoom(roomID, username);
+    if (!user) {
+      addUser({ id: socketID, username, roomID, userCharacter });
+    } else {
+      res.status(500).send('Name is already in use');
+      return;
+    }
+    
+    socket.join(roomID);
+    const users = getAllUsersInRoom(roomID);
+    return res.status(201).json({ users });
+  });
 
   socket.on('JOINED_LOBBY', (roomID) => {
     const users = getAllUsersInRoom(roomID);
     console.log(roomID);
-    socket.emit('GET_USERS', users);
-    socket.to(roomID).emit('GET_USERS', users);
     io.in(roomID).emit('GET_USERS', users);
   });
 
   socket.on('JOIN', ({ username, roomID, userCharacter }) => {
     console.log('New user connected', username, socket.id, roomID);
+
+    socket.leaveAll();
 
     roomID = roomID.trim();
     username = username.trim();
