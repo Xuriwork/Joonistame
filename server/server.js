@@ -159,17 +159,25 @@ io.on('connection', (socket) => {
 
   socket.on('SEND_MESSAGE', (data) => {
     const room = getRoomByRoomID(socket.roomID);
+    const users = getAllUsersInRoom(socket.roomID);
+    const user = getUser(socket.id);
 
     if (data.content.toLowerCase() === room.word.toLowerCase()) {
+
+      if (socket.id === room.drawer) return;
+      
       console.log(data.content);
-      io.in('game').emit('big-announcement', 'the game will start soon');
-      return socket.emit('MESSAGE', {
+      user.points =+ 5;
+      user.isCorrectGuess = true;
+      console.log(user.points);
+      io.in(socket.roomID).emit('GET_USERS', users);
+
+      return io.in(socket.roomID).emit('MESSAGE', {
         type: 'SERVER-GUESSED_CORRECT_WORD',
-        content: `You guessed it! 👏`,
+        content: `${user.username} guessed the word! 👏`,
       });
     };
 
-    const user = getUser(socket.id);
     io.in(user.roomID).emit('MESSAGE', { 
       username: user.username, 
       content: data.content, 

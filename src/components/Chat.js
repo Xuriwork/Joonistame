@@ -68,23 +68,10 @@ const Chat = ({ messages, sendMessage, socket }) => {
             <div className='messages-container' ref={chatContainerRef}>
                 {messages.map(({ type, content, username, id: authorId }, index) => (
                     <div
-                        className={
-                            type === 'SERVER-USER_JOINED'
-                                ? 'SERVER-USER_JOINED message'
-                                : type === 'SERVER-USER_LEFT'
-                                ? 'SERVER-USER_LEFT message'
-                                : type === 'NEW_NEW_DRAWER'
-                                ? 'NEW_NEW_DRAWER message'
-                                : type === 'SERVER-GUESSED_CORRECT_WORD' 
-                                ? 'SERVER-GUESSED_CORRECT_WORD message'
-                                : 'message'
-                        }
+                        className={type ? `${type} message` : 'message'}
                         key={index}
                     >
-                        {type === 'SERVER-USER_JOINED' ||
-                        type === 'SERVER-USER_LEFT' ||
-                        type === 'NEW_NEW_DRAWER' ||
-                        type === 'SERVER-GUESSED_CORRECT_WORD' ? null : (
+                        {type ? null : (
                             <h4 className='message-author' data-you={authorId === socket?.id}>
                                 {username}
                             </h4>

@@ -1,7 +1,7 @@
 const users = [];
 
 const addUser = ({ id, username, roomID, userCharacter }) => {
-    const user = { id, username, roomID, userCharacter };
+    const user = { id, username, roomID, userCharacter, points: 0, isCorrectGuess: false };
     users.push(user);
     return { user };
 };

@@ -100,7 +100,6 @@ class GameRoom extends Component{
         });
 
         socket.on('DRAW', (data) => {
-            console.log(data)
             this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
@@ -152,9 +151,6 @@ class GameRoom extends Component{
     };
 
     handleEndDrawing = () => {
-        const { drawer, socket } = this.state;
-        if (drawer !== socket.id) return;
-
         this.setState({ drawing: false });
     };
 

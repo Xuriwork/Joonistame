@@ -248,6 +248,14 @@
         margin-right: 10px;
         margin-bottom: 8px;
       }
+
+      span {
+        margin-left: auto;
+      }
+
+      &.isCorrectGuess {
+        background-color: #40e0a0;
+      }
     }
   }
 }
@@ -404,6 +412,8 @@
       width: 100%;
       height: 30px;
       margin-top: 10px;
+      background-color: #ffffff;
+      border-radius: 5px;
     }
 	}
 }
@@ -491,12 +501,10 @@
   word-wrap: break-word;
   font-size: 1em;
   box-sizing: border-box;
+  background-color: #edeeedda;
+  color: #303a52;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
   border-radius: 5px;
-  background-color: transparent;
-  color: #d4d4d4;
-  background-image: linear-gradient(to bottom, #5966a1, #414a77);
-  
 
   &:not(:last-of-type) {
     margin-bottom: 10px;
@@ -507,7 +515,7 @@
     color: #17b978;
 
     &[data-you='true'] {
-      color: #ff5959;
+      color: #599bff;
     }
   }
 }
