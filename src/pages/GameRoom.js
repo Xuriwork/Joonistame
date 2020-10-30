@@ -13,7 +13,6 @@ import ChooseWordModal from '../components/Modal/ChooseWordModal';
 
 const socketURL = 'http://localhost:5000';
 
-
 // const mockMessages = [
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
 //     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
@@ -273,7 +272,7 @@ class GameRoom extends Component{
 
         return(
             <div className='room-page'>
-                <h2>
+                <h2 className='word'>
                     {word}
                 </h2>
                 <div className='timer-container'>

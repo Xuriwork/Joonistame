@@ -79,7 +79,8 @@ io.on('connection', (socket) => {
   socket.on('JOINED_LOBBY', (roomID) => {
     const users = getAllUsersInRoom(roomID);
     console.log(roomID);
-    console.log(users);
+    socket.emit('GET_USERS', users);
+    socket.to(roomID).emit('GET_USERS', users);
     io.in(roomID).emit('GET_USERS', users);
   });
 
@@ -131,6 +132,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('SET_WORD', (word) => {
+    const room = getRoomByRoomID(socket.roomID);
+    room.word = word;
+
     const splitWord = word.split('');
 
     const hiddenWord = [];
@@ -157,6 +161,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('SEND_MESSAGE', (data) => {
+    const room = getRoomByRoomID(socket.roomID);
+    
+    if (data.content.toLowercase() === room.word.toLowercase()) {
+      console.log(data.content);
+      return
+    };
+
     const user = getUser(socket.id);
     io.in(user.roomID).emit('MESSAGE', { 
       username: user.username, 
