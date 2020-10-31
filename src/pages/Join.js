@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -14,13 +14,17 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 	const [errors, setErrors] = useState({});
 	const { socket } = useSocket();
 	
+	const parsedQueryStringCharacterURL = qs.stringify(getRandomOptions());
+	const handleGenerateRandomCharacter = useCallback(() => {
+		setUserCharacter(`https://bigheads.io/svg?${parsedQueryStringCharacterURL}`);
+		history.push(`/join?${parsedQueryStringCharacterURL}`);
+	}, [history, parsedQueryStringCharacterURL, setUserCharacter]);
+
 	useEffect(() => {
-		const handleGenerateRandomCharacter = () => {
-			const url = `/character-editor?${qs.stringify(getRandomOptions())}`;
-			return `https://bigheads.io/svg?${url}`
+		if (userCharacter === '') {
+			handleGenerateRandomCharacter();
 		};
-		setUserCharacter(handleGenerateRandomCharacter());
-	}, [setUserCharacter]);
+	}, [handleGenerateRandomCharacter, userCharacter]);
 
     const handleOnChangeRoomID = (e) => setRoomID(e.target.value);
 	const handleOnChangeUsername = (e) => setUsername(e.target.value);
@@ -54,10 +58,15 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 		});
 	};
 
+	const handlePushToCharacterEditor = (e) => {
+		e.preventDefault();
+		history.push(`/character-editor?${parsedQueryStringCharacterURL}`);
+	};
+
     return (
 			<div className='join-page'>
 				<form>
-					<img src={userCharacter} alt='User Character' />
+					<img src={userCharacter} alt='User Character' onClick={handlePushToCharacterEditor} />
 					<label htmlFor='username'>Username</label>
 					<input
 						type='text'

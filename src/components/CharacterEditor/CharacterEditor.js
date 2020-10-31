@@ -83,7 +83,6 @@ const CharacterEditor = ({ setUserCharacter }) => {
 
 	const handleSaveCharacter = () => {
 		setUserCharacter(`https://bigheads.io${svgUrl}`);
-		console.log(`https://bigheads.io${svgUrl}`)
 		history.push('/join');
 	};
 
@@ -92,9 +91,6 @@ const CharacterEditor = ({ setUserCharacter }) => {
 			<div className='character-container'>
 				<Avatar
 					{...props}
-					lashes={props.lashes === 'true'}
-					mask={true}
-					faceMask={props.faceMask === 'true'}
 				/>
 			</div>
 			<div className='settings-container'>
