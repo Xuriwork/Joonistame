@@ -11,6 +11,12 @@ const addUserToLobby = (user) => {
     lobby.users.push(user);
 };
 
+const removeUserFromLobby = ({ userID, roomID }) => {
+    const lobby = getLobbyByLobbyID(roomID);
+    const index = lobby.users.findIndex((user) => user.id === userID);
+    if (index !== -1) return lobby.users.splice(index, 1)[0];
+};
+
 const removeLobby = (id) => {
     const index = lobbies.findIndex((lobby) => lobby.id === id);
     if (index !== -1) return lobbies.splice(index, 1)[0];
@@ -24,4 +30,4 @@ const checkIfNameExistsInLobby = (users, username) => {
     else return false;
 };
 
-module.exports = { lobbies, addLobby, removeLobby, getLobbyByLobbyID, addUserToLobby, checkIfNameExistsInLobby };
+module.exports = { lobbies, addLobby, removeUserFromLobby, removeLobby, getLobbyByLobbyID, addUserToLobby, checkIfNameExistsInLobby };

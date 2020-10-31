@@ -15,9 +15,6 @@ const getUser = (id) => users.find((user) => user.id === id);
 const getAllUsersInRoom = (roomID) => users.filter((user) => user.roomID === roomID);
 const getAllUsersInRoomWhoGuessedCorrectly = (roomID) => {
     const usersInRoom = getAllUsersInRoom(roomID);
-
-    console.log('usersInRoom1', usersInRoom);
-    
     return usersInRoom.filter((user) => user.isCorrectGuess === true);
 };
 
