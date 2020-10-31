@@ -14,7 +14,10 @@ const removeUser = (id) => {
 const getUser = (id) => users.find((user) => user.id === id);
 const getAllUsersInRoom = (roomID) => users.filter((user) => user.roomID === roomID);
 const getAllUsersInRoomWhoGuessedCorrectly = (roomID) => {
-    const usersInRoom = users.filter((user) => user.roomID === roomID);
+    const usersInRoom = getAllUsersInRoom(roomID);
+
+    console.log('usersInRoom1', usersInRoom);
+    
     return usersInRoom.filter((user) => user.isCorrectGuess === true);
 };
 
@@ -38,6 +41,9 @@ const emitUserIsCorrect = ({ user, drawerUserID, io }) => {
     user.points =+ 5;
     user.isCorrectGuess = true;
     drawer.points =+ 1;
+
+    console.log('user', user);
+    console.log('usersInRoom2', usersInRoom);
 
     io.in(user.roomID).emit('GET_USERS', usersInRoom);
     io.in(user.roomID).emit('MESSAGE', {

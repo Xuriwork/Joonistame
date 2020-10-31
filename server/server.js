@@ -164,7 +164,18 @@ io.on('connection', (socket) => {
 
     if (data.content.toLowerCase() === room.word.toLowerCase()) {
       if (socket.id === room.drawer) return;
-      return emitUserIsCorrect({ user, io, drawerUserID: room.drawer });
+      emitUserIsCorrect({ user, io, drawerUserID: room.drawer });
+      
+      const usersWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
+      const usersInRoom = getAllUsersInRoom(socket.roomID);
+
+      console.log(usersInRoom.length, usersWhoGuessedCorrectly.length)
+
+      if (usersInRoom.length - 1 === usersWhoGuessedCorrectly.length) {
+        io.in(socket.roomID).emit('NEW_ROUND');
+      };
+
+      return;
     };
 
     io.in(user.roomID).emit('MESSAGE', { 
@@ -193,7 +204,7 @@ io.on('connection', (socket) => {
         io.in(user.roomID).emit('SET_DRAWER', room.drawer);
         io.in(user.roomID).emit('MESSAGE', {
           type: 'NEW_DRAWER',
-          content: `${users[0].username} is now the drawer. 🖌️`,
+          content: `${users[0].username} is now the drawer. ✏️`,
         });
 
       } else if (users.length === 0) {
