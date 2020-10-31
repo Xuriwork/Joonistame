@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
 import { ReactComponent as ClipboardIcon } from '../assets/icons/clipboard-line.svg';
+import { notyfError, notyfSuccess } from '../utils/notyf';
 
 const Lobby = ({ roomID }) => {
     const [users, setUsers] = useState([]);
@@ -17,9 +18,8 @@ const Lobby = ({ roomID }) => {
     }, [history, roomID, socket]);
 
     const copyToClipboard = () => {
-		navigator.clipboard.writeText(roomID).then(() => {
-			console.log('Copied invite link 📋');
-		}, () => console.log('Failed to copy invite link 🙁'));
+        navigator.clipboard.writeText(roomID).then(() => notyfSuccess('Copied invite link 📋'), 
+        () => notyfError('Failed to copy invite link 🙁'));
     };
     
     const handleStartGame = (e) => {

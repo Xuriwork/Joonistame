@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import './App.scss';
+import 'notyf/notyf.min.css';
 
 import { ApolloProvider } from '@apollo/client';
 import { SocketProvider } from './context/SocketContext';
