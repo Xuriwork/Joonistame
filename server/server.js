@@ -8,10 +8,10 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, removeUser, getAllUsersInRoom, checkIfNameExistsInRoom, getUser } = require('./actions/userActions');
+const { addUser, removeUser, getAllUsersInRoom, getUser, emitUserIsCorrect } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
-const { addLobby, addUserToLobby, removeLobby, getLobbyByLobbyID } = require('./actions/lobbyActions');
+const { addLobby, addUserToLobby, removeLobby, getLobbyByLobbyID, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -27,13 +27,19 @@ const createRandomRoomID = () => {
   return formatedStringId;
 };
 
+const nextRound = () => {
+
+};
+
 io.on('connection', (socket) => {
 
   socket.on('JOIN_LOBBY', ({ roomID, userCharacter, username }, callback) => {
-    const users = getAllUsersInRoom(roomID);
-    if (users.length > 10) return;
+    const { users } = getLobbyByLobbyID(roomID);
+    if (users.length === 10) {
+      return callback(false, 'Sorry, this room is full ☹️')
+    };
 
-    const user = checkIfNameExistsInRoom(roomID, username);
+    const user = checkIfNameExistsInLobby(users, username);
 
     if (!user) {
       addUserToLobby({ id: socket.id, username, roomID, userCharacter });
@@ -142,22 +148,11 @@ io.on('connection', (socket) => {
 
   socket.on('SEND_MESSAGE', (data) => {
     const room = getRoomByRoomID(socket.roomID);
-    const users = getAllUsersInRoom(socket.roomID);
     const user = getUser(socket.id);
 
     if (data.content.toLowerCase() === room.word.toLowerCase()) {
-
       if (socket.id === room.drawer) return;
-      
-      user.points =+ 5;
-      user.isCorrectGuess = true;
-      console.log(user.points);
-      io.in(socket.roomID).emit('GET_USERS', users);
-
-      return io.in(socket.roomID).emit('MESSAGE', {
-        type: 'SERVER-GUESSED_CORRECT_WORD',
-        content: `${user.username} guessed the word! 👏`,
-      });
+      return emitUserIsCorrect({ user, io, drawerUserID: room.drawer });
     };
 
     io.in(user.roomID).emit('MESSAGE', { 

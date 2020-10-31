@@ -27,4 +27,19 @@ const checkIfNameExistsInRoom = (roomID, username) => {
     return user;
 };
 
-module.exports = { addUser, removeUser, getUser, checkIfNameExistsInRoom, getAllUsersInRoom, leaveAllRooms };
+const emitUserIsCorrect = ({ user, drawerUserID, io }) => {
+    const usersInRoom = getAllUsersInRoom(user.roomID);
+    const drawer = getUser(drawerUserID);
+
+    user.points =+ 5;
+    user.isCorrectGuess = true;
+    drawer.points =+ 1;
+
+    io.in(user.roomID).emit('GET_USERS', usersInRoom);
+    io.in(user.roomID).emit('MESSAGE', {
+      type: 'SERVER-GUESSED_CORRECT_WORD',
+      content: `${user.username} guessed the word! 👏`,
+    });
+};
+
+module.exports = { addUser, removeUser, getUser, checkIfNameExistsInRoom, getAllUsersInRoom, leaveAllRooms, emitUserIsCorrect };
