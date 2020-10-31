@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
 import qs from 'query-string';
 
 import { validateJoinRoomData } from '../utils/validators';
@@ -34,52 +33,12 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 		
 		socket.emit('JOIN_LOBBY', { roomID, socketID: socket.id, username, userCharacter }, (result, message) => {
 			if (result) {
-				console.log(result);
 				handleSetCredentials(username, roomID);
 				setIsAuthorized(true);
 				history.push('/lobby');
 			} else alert(message);
 		});
 	};
-	
-	// const handleJoinRoom = async (e) => {
-    //     e.preventDefault();
-    //     const { valid, errors } = validateJoinRoomData(username, roomID);
-        
-	// 	if (!valid) return setErrors(errors);
-
-	// 	await handleSetCredentials(username, roomID);
-	// 	await setIsAuthorized(true);
-
-	// 	addUser({ variables: { id: socket.id, username, roomID, userCharacter } })
-	// 	.then(() => {
-	// 		handleSetCredentials(username, roomID);
-	// 		setIsAuthorized(true);
-	// 		history.push('/lobby');
-	// 	});
-
-	// };
-	
-	// const handleCreateRoom = async (e) => {
-	// 	e.preventDefault();
-
-	// 	if (isEmpty(username)) {
-	// 		return setErrors({ username: 'This field is required' });
-	// 	};
-
-	// 	await axios.post('http://localhost:5000/create-room', {
-	// 		socketID: socket.id,
-	// 		username,
-	// 		userCharacter
-	// 	})
-	// 	.then((response) => {
-	// 		addRoom({ variables: { id: socket.id, username, roomID: response.data.roomID, userCharacter } });
-	// 		handleSetCredentials(username, roomID);
-	// 		setIsAuthorized(true);
-	// 		history.push('/lobby');
-	// 	});
-		
-	// };
 
 	const handleCreateRoom = async (e) => {
 		e.preventDefault();

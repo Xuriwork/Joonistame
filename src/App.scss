@@ -44,7 +44,6 @@
   height: 100%;
   padding: 20px;
   box-sizing: border-box;
-  border-radius: 10px;
   background-image: linear-gradient(to right, #404B7E, #4A578F);
   box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
   
@@ -639,6 +638,7 @@
 }
 
 .lobby-page {
+  @extend %flex-complete-center-column;
   width: 100%;
 
   .heading {
@@ -684,6 +684,16 @@
         width: 70px;
       }
     }
+  }
+
+  > button {
+    margin-top: 20px;
+    padding: 10px 25px;
+    border-radius: 2px;
+    background-color: #5EDDE6;
+    background-image: linear-gradient(to right, #6AB9F7, #5EDDE6);
+    color: #ffffff;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
   }
 }
 

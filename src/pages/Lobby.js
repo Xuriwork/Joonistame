@@ -1,30 +1,31 @@
 import { useEffect, useState } from 'react';
-import { ReactComponent as ClipboardIcon } from '../assets/icons/clipboard-line.svg';
+import { useHistory } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
+import { ReactComponent as ClipboardIcon } from '../assets/icons/clipboard-line.svg';
 
 const Lobby = ({ roomID }) => {
     const [users, setUsers] = useState([]);
+    const [isAbleToStart, setIsAbleToStart] = useState(false);
     const { socket } = useSocket();
-
-    console.log('Mounted');
+    const history = useHistory();
 
     useEffect(() => {
-
-        console.log(roomID);
         socket.emit('JOINED_LOBBY', roomID);
-        socket.on('GET_USERS', (users) => {
-            console.log(users);
-            setUsers(users);
-        });
-
-    }, [roomID, socket]);
-
+        socket.on('GET_USERS', (users) => setUsers(users));
+        socket.on('ABLE_TO_START', () => setIsAbleToStart(true));
+        socket.on('START_GAME', () => history.push('/game-room'));
+    }, [history, roomID, socket]);
 
     const copyToClipboard = () => {
 		navigator.clipboard.writeText(roomID).then(() => {
 			console.log('Copied invite link 📋');
 		}, () => console.log('Failed to copy invite link 🙁'));
-	};
+    };
+    
+    const handleStartGame = (e) => {
+        e.preventDefault();
+        socket.emit('START_GAME', roomID);
+    };
 
     return (
         <div className='lobby-page'>
@@ -42,6 +43,9 @@ const Lobby = ({ roomID }) => {
                     ))
                 }
             </ul>
+            {
+                isAbleToStart && <button onClick={handleStartGame}>Start game</button>
+            }
         </div>
     );
 };

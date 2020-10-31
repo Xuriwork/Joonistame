@@ -11,6 +11,7 @@ const io = require('socket.io')(server);
 const { addUser, removeUser, getAllUsersInRoom, checkIfNameExistsInRoom, getUser } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
+const { addLobby, addUserToLobby, removeLobby, getLobbyByLobbyID } = require('./actions/lobbyActions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -29,11 +30,13 @@ const createRandomRoomID = () => {
 io.on('connection', (socket) => {
 
   socket.on('JOIN_LOBBY', ({ roomID, userCharacter, username }, callback) => {
+    const users = getAllUsersInRoom(roomID);
+    if (users.length > 10) return;
 
     const user = checkIfNameExistsInRoom(roomID, username);
 
     if (!user) {
-      addUser({ id: socket.id, username, roomID, userCharacter });
+      addUserToLobby({ id: socket.id, username, roomID, userCharacter });
       socket.join(roomID);
       callback(true);
     } else {
@@ -43,29 +46,32 @@ io.on('connection', (socket) => {
   });
 
   socket.on('CREATE_LOBBY', ({ userCharacter, username }, callback) => {
-
     const roomID = createRandomRoomID();
     const room = getRoomByRoomID(roomID);
     if (!room) {
-      addRoom({ drawer: socket.id, roomID });
-      addUser({ id: socket.id, username, roomID, userCharacter });
-      addCanvas({ roomID });
+      addLobby({ drawer: socket.id, roomID });
+      addUserToLobby({ id: socket.id, username, roomID, userCharacter });
       socket.join(roomID);
       callback(roomID);
     };
   });
 
   socket.on('JOINED_LOBBY', (roomID) => {
-    const users = getAllUsersInRoom(roomID);
-    console.log(roomID);
-    socket.emit('GET_USERS', users);
+    const { users, drawer } = getLobbyByLobbyID(roomID);
+
+    if (users.length > 1) {
+      io.sockets.connected[drawer].emit('ABLE_TO_START');
+    };
+    
     io.in(roomID).emit('GET_USERS', users);
-    io.to(roomID).emit('GET_USERS', users);
   });
 
-  socket.on('JOIN', ({ username, roomID, userCharacter }) => {
-    console.log('New user connected', username, socket.id, roomID);
+  socket.on('START_GAME', (roomID) => {
+    io.in(roomID).emit('START_GAME');
+  });
 
+  socket.on('JOIN_GAME_ROOM', ({ username, roomID, userCharacter }) => {
+    removeLobby(roomID);
     socket.leaveAll();
 
     roomID = roomID.trim();
@@ -76,13 +82,11 @@ io.on('connection', (socket) => {
     addUser({ id: socket.id, username, roomID, userCharacter });
 
     const users = getAllUsersInRoom(roomID);
-
     const room = getRoomByRoomID(roomID);
     
     if (!room) {
       addRoom({ drawer: users[0].id, roomID });
       addCanvas({ roomID });
-      console.log('Added');
     };
 
     const { drawer } = getRoomByRoomID(roomID);
@@ -99,7 +103,6 @@ io.on('connection', (socket) => {
     socket.to(roomID).emit('NEW_USER_JOINED');
 
     const canvas = getCanvasByRoomID(socket.roomID);
-    console.log('canvas', canvas);
     
     if (canvas !== undefined) {
       socket.emit('GET_CANVAS', canvas.data);
@@ -132,8 +135,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('DRAW', canvas);
   });
 
-  socket.on('CLEAR_CANVAS', (data) => {
-    console.log('Clearing Canvas');
+  socket.on('CLEAR_CANVAS', () => {
     clearCanvas(socket.roomID);
     socket.broadcast.emit('CLEAR_CANVAS');
   });
@@ -147,7 +149,6 @@ io.on('connection', (socket) => {
 
       if (socket.id === room.drawer) return;
       
-      console.log(data.content);
       user.points =+ 5;
       user.isCorrectGuess = true;
       console.log(user.points);

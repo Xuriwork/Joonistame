@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import './App.scss';
 
@@ -8,11 +8,12 @@ import { SocketProvider } from './context/SocketContext';
 import apolloClient from './utils/Apollo/ApolloSetup';
 
 import { PrivateRoute, PublicRoute } from './components/Routes';
-import CharacterEditor from './components/CharacterEditor/CharacterEditor.js';
 import Join from './pages/Join';
-import GameRoom from './pages/GameRoom';
 import Lobby from './pages/Lobby';
+import GameRoom from './pages/GameRoom';
 import ChooseWordModal from './components/Modal/ChooseWordModal';
+import CharacterEditor from './components/CharacterEditor/CharacterEditor.js';
+import NotFoundPage from './components/NotFoundPage';
 
 const App = () => {
 	const [info, setInfo] = useState({});
@@ -50,7 +51,7 @@ const App = () => {
 								userCharacter={userCharacter}
 							/>
 							<PrivateRoute
-								path='/room'
+								path='/game-room'
 								component={GameRoom}
 								setIsAuthorized={setIsAuthorized}
 								username={info.username}
@@ -76,6 +77,7 @@ const App = () => {
 								userCharacter={userCharacter}
 							/>
 							<PublicRoute path='/character-editor' component={(props) => <CharacterEditor {...props} />}  setUserCharacter={setUserCharacter} />
+							<Route component={NotFoundPage} />
 						</Switch>
 					</Router>
 				</div>

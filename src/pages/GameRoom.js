@@ -82,7 +82,7 @@ class GameRoom extends Component{
         const { context, width, height } = this.state;
         
         socket.on('connect', () => {
-			socket.emit('JOIN', { roomID, username, userCharacter });
+			socket.emit('JOIN_GAME_ROOM', { roomID, username, userCharacter });
 		});
         
         socket.on('GET_USERS', (users) => this.setState({ users }));
@@ -232,7 +232,6 @@ class GameRoom extends Component{
     };
 
     handleChangeTool = (tool) => {
-        console.log(tool);
         this.setState({ tool });
 
         if (tool === 'Pencil') {
