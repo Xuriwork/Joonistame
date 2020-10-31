@@ -118,12 +118,24 @@ io.on('connection', (socket) => {
     io.in(roomID).emit('GET_USERS', users);
   });
 
-  socket.on('NEW_ROUND', () => {
-    const users = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
-    users.forEach((user) => user.isCorrectGuess = false);
-    io.in(socket.roomID).emit('GET_USERS', users);
+  const emitNewRound = () => {
+    const roomID = socket.roomID;
+    const users = getAllUsersInRoom(roomID);
+    const room = getRoomByRoomID(roomID);
+
+    const indexOfCurrentDrawer = users.findIndex((user) => user.id === room.drawer);
+    
+    const newDrawer = users[indexOfCurrentDrawer + 1] ? users[indexOfCurrentDrawer + 1] : users[0];
+    room.drawer = newDrawer.id;
+    
+    const usersInRoomWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(roomID);
+    usersInRoomWhoGuessedCorrectly.forEach((user) => user.isCorrectGuess = false);
+    
+    clearInterval(room.countdownTimer);
+    io.in(roomID).emit('SET_DRAWER', newDrawer.id);
     io.in(socket.roomID).emit('NEW_ROUND');
-  });
+    io.in(roomID).emit('GET_USERS', users);
+  };
 
   socket.on('SET_WORD', (word) => {
     const room = getRoomByRoomID(socket.roomID);
@@ -138,11 +150,11 @@ io.on('connection', (socket) => {
     socket.to(socket.roomID).emit('SET_WORD', hiddenWord);
 
     let countdown = 90;
-    const countdownTimer = setInterval(() => {
+    room.countdownTimer = setInterval(() => {
       countdown--;
       if (countdown === 0) {
-        clearInterval(countdownTimer);
-        io.in(socket.roomID).emit('NEW_ROUND');
+        clearInterval(room.countdownTimer);
+        emitNewRound();
       };
     }, 1000);
   });
@@ -174,13 +186,14 @@ io.on('connection', (socket) => {
       const usersWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
       const usersInRoom = getAllUsersInRoom(socket.roomID);
 
-      console.log(usersInRoom.length, usersWhoGuessedCorrectly.length)
-
       if (usersInRoom.length - 1 === usersWhoGuessedCorrectly.length) {
-        io.in(socket.roomID).emit('NEW_ROUND');
+        emitNewRound();
       };
 
-      return;
+      return io.in(user.roomID).emit('MESSAGE', {
+        type: 'SERVER-NEW_ROUND',
+        content: 'New round',
+      });
     };
 
     io.in(user.roomID).emit('MESSAGE', { 
@@ -194,7 +207,8 @@ io.on('connection', (socket) => {
 
     // const test = true;
     // if (test) return;
-    
+    if (!socket.roomID) return;
+
     const user = removeUser(socket.id);
     const userInLobby = removeUserFromLobby({ userID: socket.id, roomID: socket.roomID });
 
@@ -208,7 +222,7 @@ io.on('connection', (socket) => {
       };
 
       if (lobby.users.length === 0) removeLobby(socket.id);
-      
+
       if (lobby.users.length === 1) {
         io.sockets.connected[lobby.drawer].emit('ABLE_TO_START', false);
       };

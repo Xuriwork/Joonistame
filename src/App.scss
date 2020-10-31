@@ -637,6 +637,13 @@
   color: #000000;
 }
 
+.SERVER-NEW_ROUND {
+  @extend %SERVER_MESSAGE;
+  background-image: none;
+  background-color: #fdfdfd;
+  color: #000000;
+}
+
 .lobby-page {
   @extend %flex-complete-center-column;
   width: 100%;

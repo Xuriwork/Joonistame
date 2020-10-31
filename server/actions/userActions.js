@@ -35,12 +35,9 @@ const emitUserIsCorrect = ({ user, drawerUserID, io }) => {
     const usersInRoom = getAllUsersInRoom(user.roomID);
     const drawer = getUser(drawerUserID);
 
-    user.points =+ 5;
+    user.points = user.points + 3;
     user.isCorrectGuess = true;
-    drawer.points =+ 1;
-
-    console.log('user', user);
-    console.log('usersInRoom2', usersInRoom);
+    drawer.points = drawer.points + 1;
 
     io.in(user.roomID).emit('GET_USERS', usersInRoom);
     io.in(user.roomID).emit('MESSAGE', {
