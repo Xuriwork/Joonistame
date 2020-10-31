@@ -87,21 +87,12 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 		if (isEmpty(username)) {
 			return setErrors({ username: 'This field is required' });
 		};
-		
-		await axios.post('http://localhost:5000/create-room', {
-			socketID: socket.id,
-			username,
-			userCharacter
-		})
-		.then((response) => {
-			handleSetCredentials(username, response.data.roomID);
-			setIsAuthorized(true);
-		})
-		.catch((error) => {
-			console.log(error);
-		});
 
-		history.push('/lobby');
+		socket.emit('CREATE_LOBBY', { userCharacter, username }, (roomID) => {
+			handleSetCredentials(username, roomID);
+			setIsAuthorized(true);
+			history.push('/lobby');
+		});
 	};
 
     return (

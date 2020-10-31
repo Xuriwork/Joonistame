@@ -9,18 +9,13 @@ const Lobby = ({ roomID }) => {
     console.log('Mounted');
 
     useEffect(() => {
-        
-        const connect = () => {
 
-            console.log(roomID);
-            socket.emit('JOINED_LOBBY', roomID);
-            socket.on('GET_USERS', (users) => {
-                console.log(users);
-                setUsers(users);
-            });
-        };
-
-        connect();
+        console.log(roomID);
+        socket.emit('JOINED_LOBBY', roomID);
+        socket.on('GET_USERS', (users) => {
+            console.log(users);
+            setUsers(users);
+        });
 
     }, [roomID, socket]);
 
