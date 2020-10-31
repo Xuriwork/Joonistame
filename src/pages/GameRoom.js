@@ -98,13 +98,12 @@ class GameRoom extends Component{
         });
 
         socket.on('GET_CANVAS', (canvas) => {
-            for(let i = 0; i < canvas.length; i++){
+            for (let i = 0; i < canvas.length; i++) {
                 this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].pencilColor, canvas[i].pencilSize);
             };
         });
 
         socket.on('DRAW', (data) => {
-            console.log(data);
             this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
@@ -160,9 +159,7 @@ class GameRoom extends Component{
     };
 
     handleDrawLine = (x1, y1, x2, y2, pencilColor, pencilSize) => {
-        const context = this.state.context;
-
-        if (!context) return;
+        let context = this.state.context;
 
         context.globalCompositeOperation = 'source-over';
         context.strokeStyle = pencilColor;

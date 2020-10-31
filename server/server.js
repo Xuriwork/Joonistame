@@ -170,7 +170,6 @@ io.on('connection', (socket) => {
 
   socket.on('DRAW', (data) => {
     const canvas = updateCanvas(socket.roomID, data);
-    console.log('Draw');
     socket.to(socket.roomID).emit('DRAW', canvas);
   });
 
