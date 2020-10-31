@@ -10,19 +10,7 @@ import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
 import Modal from '../components/Modal/Modal';
 
-
-const socketURL = 'http://localhost:5000';
-
-// const mockMessages = [
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-//     { username: 'Test', content: 'Hello, it\'s me!', id: 2313213 },
-// ];
+const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-server.vercel.app';
 
 class GameRoom extends Component{
     constructor(){

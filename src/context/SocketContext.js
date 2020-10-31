@@ -1,9 +1,9 @@
 import { useEffect, createContext, useState, useContext } from 'react';
 import io from 'socket.io-client';
 
-const SocketContext = createContext();
+const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-server.vercel.app';
 
-const socketURL = 'http://localhost:5000';
+const SocketContext = createContext();
 const _socket = io(socketURL);
 
 export const SocketProvider = ({ children }) => {
