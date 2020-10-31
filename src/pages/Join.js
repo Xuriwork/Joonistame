@@ -20,10 +20,7 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 	);
 
 	const parsedQueryStringCharacterURL = qs.stringify(
-		Object.entries(props).reduce(
-			(total, [key, value]) => ({ ...total, [key]: value }),
-			{}
-		)
+		Object.entries(props).reduce((total, [key, value]) => ({ ...total, [key]: value }), {})
 	);
 
 	const svgURL = useMemo(() => `/svg?${parsedQueryStringCharacterURL}`, [parsedQueryStringCharacterURL ]);
