@@ -34,3 +34,9 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ### Game Room Page (Guesser View)
 ![Joonistame Join Page](./readme_images/Joonistame-game_room_page_guesser_view.png)
+
+## Todo List
+* [ ]  Fix input pencilWidth
+* [ ]  Disable canvas for all users, but the current drawer
+* [ ]  Make the color picker update correctly
+* [ ]  Fix current server and finish implementing Dgraph
