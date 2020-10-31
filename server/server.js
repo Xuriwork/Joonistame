@@ -65,7 +65,7 @@ io.on('connection', (socket) => {
     const { users, drawer } = getLobbyByLobbyID(roomID);
 
     if (users.length > 1) {
-      io.sockets.connected[drawer].emit('ABLE_TO_START');
+      io.sockets.connected[drawer].emit('ABLE_TO_START', true);
     };
     
     io.in(roomID).emit('GET_USERS', users);
@@ -200,7 +200,19 @@ io.on('connection', (socket) => {
 
     if (userInLobby) {
       const lobby = getLobbyByLobbyID(socket.roomID);
+      const userWasLobbyLeader = socket.id === lobby.drawer;
+      
+      if (userWasLobbyLeader && lobby.users.length > 0) {
+        lobby.drawer = lobby.users[0].id;
+        io.in(socket.roomID).emit('GET_USERS', lobby.users);
+      };
+
       if (lobby.users.length === 0) removeLobby(socket.id);
+      
+      if (lobby.users.length === 1) {
+        io.sockets.connected[lobby.drawer].emit('ABLE_TO_START', false);
+      };
+
       io.in(socket.roomID).emit('GET_USERS', lobby.users);
     };
 

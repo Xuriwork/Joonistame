@@ -12,7 +12,7 @@ const Lobby = ({ roomID }) => {
     useEffect(() => {
         socket.emit('JOINED_LOBBY', roomID);
         socket.on('GET_USERS', (users) => setUsers(users));
-        socket.on('ABLE_TO_START', () => setIsAbleToStart(true));
+        socket.on('ABLE_TO_START', (payload) => setIsAbleToStart(payload));
         socket.on('START_GAME', () => history.push('/game-room'));
     }, [history, roomID, socket]);
 
