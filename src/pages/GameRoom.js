@@ -8,7 +8,7 @@ import Chat from '../components/Chat';
 import Canvas from '../components/Room/Canvas';
 import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
-import ChooseWordModal from '../components/Modal/ChooseWordModal';
+import Modal from '../components/Modal/Modal';
 
 
 const socketURL = 'http://localhost:5000';
@@ -104,6 +104,7 @@ class GameRoom extends Component{
         });
 
         socket.on('DRAW', (data) => {
+            console.log(data);
             this.handleDrawLine(data.x1, data.y1, data.x2, data.y2, data.pencilColor, data.pencilSize);
         });
 
@@ -312,9 +313,7 @@ class GameRoom extends Component{
                         />
                     </div>
                 </div>
-                {socket && socket.id === drawer && !isTimerActive && (
-							<ChooseWordModal handleChooseWord={this.handleChooseWord} />
-						)}
+                {socket && !isTimerActive && <Modal socketID={socket.id} drawer={drawer} isTimerActive={isTimerActive} handleChooseWord={this.handleChooseWord} />}
             </div>
         )
     }
