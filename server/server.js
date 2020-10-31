@@ -8,7 +8,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, removeUser, getAllUsersInRoom, getUser, emitUserIsCorrect } = require('./actions/userActions');
+const { addUser, removeUser, getAllUsersInRoom, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 const { addLobby, addUserToLobby, removeLobby, getLobbyByLobbyID, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
@@ -25,10 +25,6 @@ const createRandomRoomID = () => {
   const randomId = nanoid();
   const formatedStringId = randomId.substring(0,5) + '-' + randomId.substring(5, 10) + '-' + randomId.substring(10, 15) + '-' + randomId.substring(15, 20);
   return formatedStringId;
-};
-
-const nextRound = () => {
-
 };
 
 io.on('connection', (socket) => {
@@ -118,6 +114,13 @@ io.on('connection', (socket) => {
     io.in(roomID).emit('GET_USERS', users);
   });
 
+  socket.on('NEW_ROUND', () => {
+    const users = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
+    users.forEach((user) => user.isCorrectGuess = false);
+    io.in(socket.roomID).emit('GET_USERS', users);
+    io.in(socket.roomID).emit('NEW_ROUND');
+  });
+
   socket.on('SET_WORD', (word) => {
     const room = getRoomByRoomID(socket.roomID);
     room.word = word;
@@ -129,6 +132,15 @@ io.on('connection', (socket) => {
 
     socket.emit('SET_WORD', word);
     socket.to(socket.roomID).emit('SET_WORD', hiddenWord);
+
+    let countdown = 90;
+    const countdownTimer = setInterval(() => {
+      countdown--;
+      if (countdown === 0) {
+        clearInterval(countdownTimer);
+        io.in(socket.roomID).emit('NEW_ROUND');
+      };
+    }, 1000);
   });
 
   socket.on('RESIZED', () => {
@@ -164,8 +176,8 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
 
-    const test = true;
-    if (test) return;
+    // const test = true;
+    // if (test) return;
     
     const user = removeUser(socket.id);
 

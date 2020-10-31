@@ -13,6 +13,10 @@ const removeUser = (id) => {
 
 const getUser = (id) => users.find((user) => user.id === id);
 const getAllUsersInRoom = (roomID) => users.filter((user) => user.roomID === roomID);
+const getAllUsersInRoomWhoGuessedCorrectly = (roomID) => {
+    const usersInRoom = users.filter((user) => user.roomID === roomID);
+    return usersInRoom.filter((user) => user.isCorrectGuess === true);
+};
 
 const leaveAllRooms = (socket) => {
 	const rooms = socket.adapter.sids[socket.id];
@@ -42,4 +46,4 @@ const emitUserIsCorrect = ({ user, drawerUserID, io }) => {
     });
 };
 
-module.exports = { addUser, removeUser, getUser, checkIfNameExistsInRoom, getAllUsersInRoom, leaveAllRooms, emitUserIsCorrect };
+module.exports = { addUser, removeUser, getUser, checkIfNameExistsInRoom, getAllUsersInRoom, getAllUsersInRoomWhoGuessedCorrectly, leaveAllRooms, emitUserIsCorrect };

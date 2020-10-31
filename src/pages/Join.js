@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -26,9 +26,7 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 		)
 	);
 
-	const svgURL = useMemo(() => `/svg?${parsedQueryStringCharacterURL}`, [
-		parsedQueryStringCharacterURL,
-	]);
+	const svgURL = useMemo(() => `/svg?${parsedQueryStringCharacterURL}`, [parsedQueryStringCharacterURL ]);
 
 	useEffect(() => {
 		if (userCharacter === '') {
@@ -67,7 +65,7 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
 			history.push('/lobby');
 		});
 	};
-	
+
 	const handlePushToCharacterEditor = (e) => {
 		e.preventDefault();
 		history.push(`/character-editor?${parsedQueryStringCharacterURL}`);

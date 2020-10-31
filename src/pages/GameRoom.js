@@ -93,6 +93,10 @@ class GameRoom extends Component{
             this.setState({ word, isTimerActive: true });
         });
 
+        socket.on('NEW_ROUND', () => {
+            this.setState({ isTimerActive: false, word: null, duration: 90000, time: 0 });
+        });
+
         socket.on('GET_CANVAS', (canvas) => {
             for(let i = 0; i < canvas.length; i++){
                 this.handleDrawLine(canvas[i].x1, canvas[i].y1, canvas[i].x2, canvas[i].y2, canvas[i].pencilColor, canvas[i].pencilSize);
