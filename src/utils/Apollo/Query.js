@@ -35,8 +35,8 @@ const ADD_USER = gql`
 `;
 
 const GET_USERS = gql`
-  query User($roomID: String!) {
-    queryUser(filter: {roomID: {anyofterms: $roomID}}) {
+  subscription User($filter: UserFilter) {
+    queryUser(filter: $filter) {
         id,
         username,
         roomID,
