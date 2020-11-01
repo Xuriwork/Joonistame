@@ -281,6 +281,8 @@ class GameRoom extends Component{
                         canvasContainer={(node) => { this.canvasContainer = node }}
                         tool={tool}
                         context={context}
+                        socketID={socket?.id} 
+                        drawer={drawer}
                     />
                     <div className='sidebar_second'>
                         <DrawerTools 
