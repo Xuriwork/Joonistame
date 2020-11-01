@@ -19,8 +19,12 @@ const Lobby = ({ roomID }) => {
     }, [history, roomID, socket]);
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(roomID).then(() => notyfSuccess('Copied invite link 📋'), 
-        () => notyfError('Failed to copy invite link 🙁'));
+        if (!navigator.clipboard) {
+            return notyfError('Clipboard API not available 🙁')
+        };
+        navigator.clipboard.writeText(roomID)
+        .then(() => notyfSuccess('Copied invite link 📋'))
+        .catch(() => notyfError('Failed to copy invite link 🙁'));
     };
     
     const handleStartGame = (e) => {
