@@ -253,7 +253,7 @@ class GameRoom extends Component{
     };
 
     render() {
-        const { socket, context, users, pencilSize, messages, tool, time, duration, isTimerActive, word, drawer } = this.state;
+        const { socket, context, users, pencilSize, pencilColor, messages, tool, time, duration, isTimerActive, word, drawer } = this.state;
 
         return(
             <div className='room-page'>
@@ -288,6 +288,7 @@ class GameRoom extends Component{
                         <DrawerTools 
                             handleOnChangePencilSize={this.handleOnChangePencilSize} 
                             pencilSize={pencilSize} 
+                            pencilColor={pencilColor}
                             handleChangeColor={this.handleChangeColor}
                             handleClearCanvas={this.handleClearCanvas}
                             handleChangeTool={this.handleChangeTool}

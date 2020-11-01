@@ -11,7 +11,7 @@ const colors = [
     '#6E3B3B',
 ];
 
-const ColorPalette = ({ handleChangeColor }) => {
+const ColorPalette = ({ pencilColor, handleChangeColor }) => {
 	
 	const onChange = (e) => handleChangeColor(e.target.value);
 	
@@ -26,7 +26,7 @@ const ColorPalette = ({ handleChangeColor }) => {
 				></div>
 			))}
 			<label htmlFor='colorPicker' aria-label='colorPicker' style={{ display: 'none' }}></label>
-			<input type='color' id='colorPicker' name='head' value='#e66465' onChange={onChange} />
+			<input type='color' id='colorPicker' name='head' value={pencilColor} onChange={onChange} />
 		</div>
 	)
 };
