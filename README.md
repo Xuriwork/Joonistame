@@ -6,9 +6,10 @@ Live site hosted at: [https://joonistame.vercel.app](https://joonistame.vercel.a
 
 ## Scripts for Local Development
 
+- `yarn install`: To install the dependencies
+- `yarn dev`: Runs the React app and starts up the server
 - `yarn start`: Starts the development app
 - `yarn build`: Builds the production app
-- `yarn dev`: Runs the React app and starts up the server
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
