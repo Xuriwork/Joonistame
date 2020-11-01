@@ -209,8 +209,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
 
-    // const test = true;
-    // if (test) return;
     if (!socket.roomID) return;
 
     const user = removeUser(socket.id);

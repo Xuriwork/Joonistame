@@ -38,6 +38,5 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Todo List
 * [ ]  Fix input pencilWidth
-* [ ]  Disable canvas for all users, but the current drawer
-* [ ]  Make the color picker update correctly
-* [ ]  Fix current server and finish implementing Dgraph
+* [ ]  Make the game responsive
+* [ ]  Finish implementing Dgraph
