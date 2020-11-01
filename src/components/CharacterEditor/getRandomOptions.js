@@ -39,9 +39,9 @@ import {
     const hatColor = selectRandomKey(theme.colors.clothing)
     const faceMaskColor = selectRandomKey(theme.colors.clothing)
   
-    const mask = true
-    const faceMask = true
-    const lashes = Math.random() > 0.5
+    const mask = true;
+    const faceMask = true;
+    const lashes = Math.random() > 0.5;
   
     return {
       skinTone,
