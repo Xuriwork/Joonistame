@@ -15,6 +15,7 @@ const Lobby = ({ roomID }) => {
         socket.on('GET_USERS', (users) => setUsers(users));
         socket.on('ABLE_TO_START', (payload) => setIsAbleToStart(payload));
         socket.on('START_GAME', () => history.push('/game-room'));
+        return () => socket.removeAllListeners();
     }, [history, roomID, socket]);
 
     const copyToClipboard = () => {

@@ -13,6 +13,7 @@ const addUserToLobby = (user) => {
 
 const removeUserFromLobby = ({ userID, roomID }) => {
     const lobby = getLobbyByLobbyID(roomID);
+    if (!lobby) return false;
     const index = lobby.users.findIndex((user) => user.id === userID);
     if (index !== -1) return lobby.users.splice(index, 1)[0];
 };

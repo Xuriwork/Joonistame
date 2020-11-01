@@ -96,7 +96,8 @@ class GameRoom extends Component{
         });
 
         socket.on('CLEAR_CANVAS', () => {
-            context.clearRect(0, 0, width, height)
+            if (!context) return;
+            context.clearRect(0, 0, width, height);
         });
 
         socket.on('MESSAGE', (data) => this.setMessages(data));
@@ -164,6 +165,9 @@ class GameRoom extends Component{
     };
 
     handleEraseCanvas = (prevX, prevY, x, y) => {
+        const { socket, drawer } = this.state;
+        if (socket.id !== drawer) return;
+
         const context = this.state.context;
 
         if (!context) return;
@@ -186,6 +190,9 @@ class GameRoom extends Component{
     };
 
     handleOnChangePencilSize = (e) =>{
+        const { socket, drawer } = this.state;
+        if (socket.id !== drawer) return;
+
         const value = e.target.value;
         this.setState({ pencilSize: value });
     };
@@ -193,6 +200,9 @@ class GameRoom extends Component{
     handleChangeColor = (color) => this.setState({ pencilColor: color });
 
     handleUseBucket = () => {
+        const { socket, drawer } = this.state;
+        if (socket.id !== drawer) return;
+
         const { context, width, height, pencilColor } = this.state;
 
         context.fillStyle = pencilColor;
@@ -222,6 +232,9 @@ class GameRoom extends Component{
     };
 
     handleChangeTool = (tool) => {
+        const { socket, drawer } = this.state;
+        if (socket.id !== drawer) return;
+
         this.setState({ tool });
 
         if (tool === 'Pencil') {
@@ -244,12 +257,15 @@ class GameRoom extends Component{
     };  
 
     handleChooseWord = (word) => {
+        const { socket, drawer } = this.state;
+        if (socket.id !== drawer) return;
+
         const splitWord = word.split('');
 
         const hiddenWord = [];
         splitWord.forEach(() => hiddenWord.push('_'));
 
-        this.state.socket.emit('SET_WORD', word);
+        socket.emit('SET_WORD', word);
     };
 
     render() {
