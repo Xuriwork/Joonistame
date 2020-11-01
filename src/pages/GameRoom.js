@@ -10,7 +10,7 @@ import DrawerTools from '../components/Room/DrawerTools/DrawerTools';
 import UsersList from '../components/Room/UsersList';
 import Modal from '../components/Modal/Modal';
 
-const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-api.vercel.app';
+const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-server.herokuapp.com';
 
 class GameRoom extends Component{
     constructor(){

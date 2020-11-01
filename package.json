@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "dev": "concurrently \"nodemon ./server/server.js\" \"react-scripts start\"",
+    "dev": "concurrently \"nodemon ./server/indes.js\" \"react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

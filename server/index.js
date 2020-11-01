@@ -28,10 +28,6 @@ const createRandomRoomID = () => {
   return formatedStringId;
 };
 
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));
-});
-
 io.on('connection', (socket) => {
 
   socket.on('JOIN_LOBBY', ({ roomID, userCharacter, username }, callback) => {

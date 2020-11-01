@@ -1,7 +1,7 @@
 import { useEffect, createContext, useState, useContext } from 'react';
 import io from 'socket.io-client';
 
-const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-api.vercel.app';
+const socketURL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://joonistame-server.herokuapp.com';
 
 const SocketContext = createContext();
 const _socket = io(socketURL);
