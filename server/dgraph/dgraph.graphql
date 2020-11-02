@@ -1,0 +1,51 @@
+type User @withSubscription {
+    id: String! @search
+    username: String!
+    roomID: String! @search
+    userCharacter: String!
+    points: Int!
+}
+
+type Room @withSubscription {
+    roomID: String! @search
+    drawer: String!
+    users: [User] @hasInverse(field: roomID)
+}
+
+type Lobby @withSubscription {
+    drawer: String! 
+    roomID: String! @search
+    maxLobbySize: Int!
+    users: [User] @hasInverse(field: roomID)
+}
+
+const typeDefs = gql`
+type User {
+    id: String!
+    username: String!
+    roomID: String!
+    userCharacter: String!
+    points: Int!
+    isCorrectGuess: Boolean!
+}
+  
+type Room  {
+    roomID: String!
+    drawer: String!
+}
+
+type Lobby {
+    drawer: String! 
+    roomID: String!
+    maxLobbySize: Int!
+    users: [User]
+}
+
+type Query {
+    getUser(id: String!): User
+    getAllUsers(roomID: String!): [User]
+    getAllUsersInRoomWhoGuessedCorrectly(roomID: String!, isCorrectGuess: true): [User]
+    getLobby(roomID: String!): [Lobby]
+    getAllPosts: [Post]
+}
+`

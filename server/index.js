@@ -17,7 +17,14 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.static(__dirname + '/../../build'));
 app.use(cors());
-
+app.use((req, res, next) => {
+  const allowedOrigins = ['http://localhost:3000', 'https://joonistame.herokuapp.com'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+       res.setHeader('Access-Control-Allow-Origin', origin);
+  };
+  next();
+});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
