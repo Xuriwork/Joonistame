@@ -35,7 +35,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addUser(id: String, username: String, roomID: String, userCharacter: String, points: Int): User!
+    addUser(username: String!, id: String!, roomID: String!, userCharacter: String!, points: Int!, isCorrectGuess: Boolean!): User
   }
 `
 
@@ -68,8 +68,31 @@ query {
     headers,
     body
   })
-  const result = await fetchResult.json()
+  const result = await fetchResult.json();
   return result.data[name]
+};
+
+const sendMutation = async({ name, args, fields }) => {
+  let body = `
+  mutation {
+    ${name} (input: [{ id: "Test", username: "Test", roomID: "Test", userCharacter: "Test", points: 2, isCorrectGuess: false }] }) {
+      user {
+        username
+      }
+    }
+  }`
+  
+  console.log(body);
+
+  const fetchResult = await fetch(GRAPH_ENDPOINT, {
+    method,
+    headers,
+    body
+  });
+
+  const result = await fetchResult.json();
+  console.log(result);
+  return result.data
 
 };
 
@@ -81,7 +104,9 @@ const resolvers = {
     getRoom: async (_parent, args) => sendQuery({ name: 'queryRoom', args, fields: 'roomID drawer' })
   },
   Mutation: {
-    addUser: async (_parent, args) => sendQuery({ name: 'addUser', fields: 'id username roomID userCharacter points isCorrectGuess' }),
+    addUser: async (_parent, args) => {
+      sendMutation({ name: 'addUser', args, fields: 'id username roomID userCharacter points isCorrectGuess' });
+    },
   }
 };
 
