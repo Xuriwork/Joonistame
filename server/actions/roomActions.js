@@ -1,7 +1,7 @@
 const rooms = [];
 
 const addRoom = ({ drawer, roomID }) => {
-    const room = { drawer, roomID, queue: [], maxRoomSize: 20, word: null, countdownTimer: null };
+    const room = { drawer, roomID, maxRoomSize: 10, word: null, countdownTimer: null };
     rooms.push(room);
 
     return room;

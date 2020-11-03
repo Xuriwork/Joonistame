@@ -1,64 +1,64 @@
 {
-  "name": "joonistame",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@apollo/client": "^3.2.5",
-    "@apollo/link-ws": "^2.0.0-beta.3",
-    "@bigheads/core": "^0.3.1",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "apollo-client": "^2.6.10",
-    "axios": "^0.21.0",
-    "body-parser": "^1.19.0",
-    "concurrently": "^5.3.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "graphql": "^15.4.0",
-    "http": "^0.0.1-security",
-    "lodash": "^4.17.20",
-    "morgan": "^1.10.0",
-    "nanoid": "^3.1.16",
-    "node-sass": "^4.14.1",
-    "notyf": "^3.9.0",
-    "path": "^0.12.7",
-    "query-string": "^6.13.6",
-    "react": "^17.0.1",
-    "react-apollo": "^3.1.5",
-    "react-dom": "^17.0.1",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.0",
-    "react-timecode": "^1.2.0",
-    "react-timer-wrapper": "^0.4.1",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.1",
-    "subscriptions-transport-ws": "^0.9.18",
-    "web-vitals": "^0.2.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "dev": "concurrently \"nodemon ./server/indes.js\" \"react-scripts start\"",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "name": "joonistame",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+      "@apollo/client": "^3.2.5",
+      "@apollo/link-ws": "^2.0.0-beta.3",
+      "@bigheads/core": "^0.3.1",
+      "@testing-library/jest-dom": "^5.11.4",
+      "@testing-library/react": "^11.1.0",
+      "@testing-library/user-event": "^12.1.10",
+      "apollo-client": "^2.6.10",
+      "axios": "^0.21.0",
+      "body-parser": "^1.19.0",
+      "concurrently": "^5.3.0",
+      "cors": "^2.8.5",
+      "express": "^4.17.1",
+      "graphql": "^15.4.0",
+      "http": "^0.0.1-security",
+      "lodash": "^4.17.20",
+      "morgan": "^1.10.0",
+      "nanoid": "^3.1.16",
+      "node-sass": "^4.14.1",
+      "notyf": "^3.9.0",
+      "path": "^0.12.7",
+      "query-string": "^6.13.6",
+      "react": "^17.0.1",
+      "react-apollo": "^3.1.5",
+      "react-dom": "^17.0.1",
+      "react-router-dom": "^5.2.0",
+      "react-scripts": "4.0.0",
+      "react-timecode": "^1.2.0",
+      "react-timer-wrapper": "^0.4.1",
+      "socket.io": "^2.3.0",
+      "socket.io-client": "^2.3.1",
+      "subscriptions-transport-ws": "^0.9.18",
+      "web-vitals": "^0.2.4"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "dev": "concurrently \"nodemon ./server/index.js\" \"react-scripts start\"",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+      "extends": [
+        "react-app",
+        "react-app/jest"
+      ]
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    }
   }
-}

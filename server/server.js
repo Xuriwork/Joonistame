@@ -1,120 +1,167 @@
-const { ApolloServer, gql } = require('apollo-server');
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 const GRAPH_ENDPOINT = 'https://superb-kick.us-west-2.aws.cloud.dgraph.io/graphql';
 
-const typeDefs = gql`
-  type User {
-      id: String!
-      username: String!
-      roomID: String!
-      userCharacter: String!
-      points: Int!
-      isCorrectGuess: Boolean!
-  }
-    
-  type Room  {
-      roomID: String!
-      drawer: String!
-      users: [User]
-  }
-
-  type Lobby {
-      drawer: String! 
-      roomID: String!
-      maxLobbySize: Int!
-      users: [User]
-  }
-
-  type Query {
-      getUser(id: String!): User
-      getAllUsers(roomID: String!): [User]
-      getAllUsersInRoomWhoGuessedCorrectly(roomID: String!, isCorrectGuess: Boolean!): [User]
-      getLobby(roomID: String!): [Lobby]
-      getRoom(roomID: String!): [Room]
-  }
-
-  type Mutation {
-    addUser(username: String!, id: String!, roomID: String!, userCharacter: String!, points: Int!, isCorrectGuess: Boolean!): User
-  }
-`
-
-const method = 'POST'
-const headers = {
-  'Content-type': 'application/graphql'
-};
-
-const argsToString = (args) => {
-  if (typeof args === 'object') { let argStrings = []
-      Object.keys(args).forEach((key) => {
-      argStrings.push(`${key}:"${args[key]}"`)
-    })
-    if (argStrings.length) {
-      return `${argStrings.join(', ')}`
+const fetchGraphQL = async (query) => {
+  const result = await fetch(
+    GRAPH_ENDPOINT,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ query })
     }
-  }
-  return ''
+  );
+  return await result.json();
 };
 
-const sendQuery = async({ name, args, fields }) => {
-  let body = `
-query {
-  ${name} (${argsToString(args)}) {
-    ${fields}
-  }
-}`
-  const fetchResult = await fetch(GRAPH_ENDPOINT, {
-    method,
-    headers,
-    body
-  })
-  const result = await fetchResult.json();
-  return result.data[name]
-};
+const sendQuery = async({ operationName, query, variables }) => {
+  const { errors, data } = await fetchGraphQL(query);
 
-const sendMutation = async({ name, args, fields }) => {
-  let body = `
-  mutation {
-    ${name} (input: [{ id: "Test", username: "Test", roomID: "Test", userCharacter: "Test", points: 2, isCorrectGuess: false }] }) {
-      user {
-        username
-      }
-    }
-  }`
+  if (errors) console.error(errors);
   
-  console.log(body);
+  console.log(data[operationName]);
+};
 
-  const fetchResult = await fetch(GRAPH_ENDPOINT, {
-    method,
-    headers,
-    body
-  });
+const sendMutation = async ({ operationName, mutation, variables }) => {
+  const { errors, data } = await fetchGraphQL(mutation);
 
-  const result = await fetchResult.json();
-  console.log(result);
-  return result.data
+  if (errors) console.error(errors);
+  
+  console.log(data[operationName]);
+};
 
+const schema = {
+  Query: {
+    allUsersQuery: `
+      query {
+        queryUser {
+          id
+          username
+          roomID
+          userCharacter
+          points
+        }
+      }
+    `,
+    getAllUsersInRoom: (roomID) => `
+      query {
+        queryUser(filter: {roomID: {allofterms: "${roomID}"}}) {
+          roomID
+          username
+          userCharacter
+          points
+          isCorrectGuess
+          id
+        }
+      }
+    `,
+    getUserQuery: (id) => `
+        query {
+          queryUser(filter: {id: {allofterms: "${id}"}}) {
+            id
+            username
+            roomID
+            userCharacter
+            points
+          }
+        }
+    `,
+    allRoomsQuery: `
+      query {
+        queryRoom {
+          roomID,
+          drawer,
+          users {
+            username,
+            id
+          }
+        }
+      }
+    `,
+    getRoomQuery: (roomID) => `
+        query {
+          queryRoom(filter: {roomID: {allofterms: "${roomID}"}}) {
+            roomID,
+            drawer,
+            users {
+              username,
+              id
+            }
+          }
+        }
+    `,
+  },
+  Mutation: {
+    addUserMutation: (args) => `
+      mutation {
+        addUser(input: [{ id: "${args.id}", username: "${args.username}", roomID: "${args.roomID}", userCharacter: "${args.userCharacter}", points: 0, isCorrectGuess: false }]) {
+          user {
+            id 
+            username 
+            roomID 
+            userCharacter 
+            points 
+            isCorrectGuess
+          }
+        }
+      }
+    `,
+    addRoomMutation: ({ roomID, drawer, maxRoomSize, word }) => `
+      mutation {
+        addRoom(input: [{ roomID: "${roomID}", drawer: "${drawer}", maxRoomSize: ${maxRoomSize}, word: "${word}" }]) {
+          room {
+            roomID,
+            drawer,
+            users {
+              id
+              username,
+            }
+          }
+        }
+      }
+    `,
+  }
 };
 
 const resolvers = {
   Query: {
-    getAllUsers: async () => sendQuery({ name: 'queryUser', fields: 'id username roomID userCharacter points isCorrectGuess' }),
-    getUser: async (_parent, args) => sendQuery({ name: 'getUser', args, fields: 'id username roomID userCharacter points isCorrectGuess' }),
-    getLobby: async (_parent, args) => sendQuery({ name: 'queryLobby', args, fields: 'drawer roomID maxLobbySize users { drawer roomID maxLobbySize users }' }),
-    getRoom: async (_parent, args) => sendQuery({ name: 'queryRoom', args, fields: 'roomID drawer' })
+    getAllUsers: async (query) => sendQuery({ 
+      operationName: 'queryUser', 
+      query,
+      variables: 'id username roomID userCharacter points isCorrectGuess' 
+    }),
+    getUser: async (query) => sendQuery({ 
+      operationName: 'queryUser', 
+      query, 
+      variables: 'id username roomID userCharacter points isCorrectGuess' 
+    }),
+    getLobby: async (query) => sendQuery({ 
+      name: 'queryLobby', 
+      query, 
+      variables: 'roomID drawer, maxLobbySize, users: { username, id }' 
+    }),
+    getRoom: async (query) => sendQuery({ 
+      operationName: 'queryRoom', 
+      query, 
+      variables: 'roomID drawer, maxRoomSize, word' 
+    })
   },
   Mutation: {
-    addUser: async (_parent, args) => {
-      sendMutation({ name: 'addUser', args, fields: 'id username roomID userCharacter points isCorrectGuess' });
-    },
+    addUser: async (mutation) => sendMutation({ 
+        operationName: 'addUser', 
+        mutation,
+        variables: 'id username roomID userCharacter points isCorrectGuess'
+    }),
+    addRoom: async (mutation) => sendMutation({ 
+      operationName: 'addRoom', 
+      mutation,
+      variables: 'roomID drawer maxRoomSize word'
+    }),
   }
 };
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
-
-server.listen().then(({ url })=> {
-  console.log(`Server ready at at ${url}`)
-});
+//resolvers.Mutation.addUser(schema.Mutation.addUserMutation({id: "Test", username: "Test", roomID: "Test", userCharacter: "Test", points: 10, isCorrectGuess: false}));
+//resolvers.Mutation.addRoom(schema.Mutation.addRoomMutation({ roomID: "Test", drawer: "Test", maxRoomSize: 20, word: null }));
+resolvers.Query.getUser(schema.Query.getAllUsersInRoom('Test'));

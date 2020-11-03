@@ -1,0 +1,9 @@
+generates:
+  server/apollo-dgraph/types/gql.d.ts:
+    schema:
+      - server/apollo-dgraph/schema/schema.graphql
+    plugins:
+      - typescript
+      - typescript-resolvers
+    config:
+      useIndexSignature: true

@@ -4,19 +4,20 @@ type User @withSubscription {
     roomID: String! @search
     userCharacter: String!
     points: Int!
+    isCorrectGuess: Boolean!
 }
 
 type Room @withSubscription {
     roomID: String! @search
     drawer: String!
-    users: [User] @hasInverse(field: roomID)
+    users: [User]
 }
 
 type Lobby @withSubscription {
     drawer: String! 
     roomID: String! @search
     maxLobbySize: Int!
-    users: [User] @hasInverse(field: roomID)
+    users: [User]
 }
 
 const typeDefs = gql`
