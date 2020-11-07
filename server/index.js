@@ -37,6 +37,7 @@ const createRandomID = () => {
 io.on('connection', (socket) => {
 
   socket.on('JOIN_LOBBY', async ({ lobbyID, userCharacter, username }, callback) => {
+    console.log(lobbyID);
     const lobby = await getLobby(lobbyID);
     const users = await getAllUsersInLobby(lobbyID);
     console.log(lobby);
@@ -61,7 +62,9 @@ io.on('connection', (socket) => {
 
   socket.on('CREATE_LOBBY', async ({ userCharacter, username }, callback) => {
     const lobbyID = createRandomID();
-    const lobby = await getLobby(lobbyID);
+    const lobby = await getLobby(lobbyID)[0];
+
+    console.log(lobbyID, lobby)
 
     if (!lobby) {
       addUser({ id: socket.id, username, roomID: lobbyID, userCharacter });
@@ -80,7 +83,7 @@ io.on('connection', (socket) => {
     const users = await getAllUsersInLobby(lobbyID);
 
     if (users.length > 1) {
-      io.sockets.connected[lobby.drawer].emit('ABLE_TO_START', true);
+      io.sockets.connected[lobby[0].drawer].emit('ABLE_TO_START', true);
     };
     io.in(lobbyID).emit('GET_USERS', users);
   });

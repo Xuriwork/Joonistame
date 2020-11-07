@@ -17,7 +17,7 @@ const getLobby = async (lobbyID) =>
             }
         `,
 		variables: 'lobbyID drawer, maxLobbySize, users: { username, id }',
-	})[0];
+	});
 
 const addLobby = async ({ lobbyID, drawer }) =>
 	sendMutation({
