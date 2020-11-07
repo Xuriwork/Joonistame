@@ -7,7 +7,7 @@ const getLobby = async (lobbyID) =>
             query {
                 queryLobby(filter: {lobbyID: {allofterms: "${lobbyID}"}}) {
                     lobbyID,
-                    drawer,
+                    host,
                     users {
                         id,
                         username,
@@ -16,18 +16,18 @@ const getLobby = async (lobbyID) =>
                 }
             }
         `,
-		variables: 'lobbyID drawer, maxLobbySize, users: { username, id }',
+		variables: 'lobbyID host, maxLobbySize, users: { username, id }',
 	});
 
-const addLobby = async ({ lobbyID, drawer }) =>
+const addLobby = async ({ lobbyID, host, hostName }) =>
 	sendMutation({
 		operationName: 'addLobby',
         mutation: `
             mutation {
-                addLobby(input: [{ lobbyID: "${lobbyID}", drawer: "${drawer}", maxLobbySize: 10, users: [] }]) {
+                addLobby(input: [{ lobbyID: "${lobbyID}", host: "${host}", hostName: "${hostName}", maxLobbySize: 10, users: [] }]) {
                     lobby {
                         lobbyID,
-                        drawer,
+                        host,
                         users {
                             id,
                             username,
@@ -37,16 +37,17 @@ const addLobby = async ({ lobbyID, drawer }) =>
                 }
             }
         `,
-		variables: 'lobbyID drawer maxLobbySize',
+		variables: 'lobbyID host maxLobbySize',
 	});
 
 const deleteLobby = async (lobbyID) =>
 	sendMutation({
 		operationName: 'deleteLobby',
 		mutation: `
-        mutation {
-                    deleteLobby(filter: {lobbyID: {allofterms: "${lobbyID}"}}) {
-                    drawer,
+            mutation {
+                deleteLobby(filter: {lobbyID: {allofterms: "${lobbyID}"}}) {
+                    host,
+                    hostName,
                     lobby {
                         lobbyID
                     }
@@ -82,7 +83,6 @@ const addUserToLobby = async ({ lobbyID, user }) => sendMutation({
 // };
 
 const checkIfNameExistsInLobby = (users, username) => {
-    console.log(users, username);
 	const user = users.filter((user) => user.username === username)[0];
 	if (user) return true;
 	else return false;
