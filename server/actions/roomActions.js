@@ -1,17 +1,59 @@
-const rooms = [];
+const { sendMutation, sendQuery } = require('./dgraphActions');
 
-const addRoom = ({ drawer, roomID }) => {
-    const room = { drawer, roomID, maxRoomSize: 10, word: null, countdownTimer: null };
-    rooms.push(room);
+const addRoom = async ({ roomID, drawer, word }) => sendMutation({
+	operationName: 'addRoom',
+    mutation: `
+        mutation {
+            addRoom(input: [{ roomID: "${roomID}", drawer: "${drawer}", maxRoomSize: 10, word: "${word}" }]) {
+                room {
+                    roomID,
+                    drawer
+                }
+            }
+        }
+    `,
+    variables: 'roomID drawer maxRoomSize word',
+});
 
-    return room;
-};
+const deleteRoom = async (roomID) => sendMutation({ 
+    operationName: 'deleteRoom', 
+    mutation: `
+        mutation {
+            deleteRoom(filter: {roomID: {allofterms: "${roomID}"}}) {
+                room {
+                    roomID
+                }
+            }
+        }
+    `,
+    variables: 'roomID'
+});
 
-const removeRoom = (id) => {
-    const index = rooms.findIndex((room) => room.id === id);
-    if (index !== -1) return rooms.splice(index, 1)[0];
-};
+const getRoom = async (roomID) => sendQuery({ 
+    operationName: 'queryRoom', 
+    query: `
+        query {
+            queryRoom(filter: {roomID: {allofterms: "${roomID}"}}) {
+                roomID,
+                drawer,
+            }
+        }
+    `, 
+    variables: 'roomID drawer, maxRoomSize, word' 
+})[0];
 
-const getRoomByRoomID = (roomID) => rooms.filter((room) => room.roomID === roomID)[0];
+// const addRoom = ({ drawer, roomID }) => {
+// 	const room = {
+// 		drawer,
+// 		roomID,
+// 		maxRoomSize: 10,
+// 		word: null,
+// 		countdownTimer: null,
+// 	};
+// 	rooms.push(room);
 
-module.exports = { rooms, addRoom, removeRoom, getRoomByRoomID };
+// 	return room;
+// };
+
+
+module.exports = { addRoom, deleteRoom, getRoom };

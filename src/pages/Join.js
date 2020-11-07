@@ -40,8 +40,9 @@ const Join = ({ setIsAuthorized, handleSetCredentials, userCharacter, setUserCha
         
 		if (!valid) return setErrors(errors);
 		
-		socket.emit('JOIN_LOBBY', { roomID, socketID: socket.id, username, userCharacter }, (result, message) => {
+		socket.emit('JOIN_LOBBY', { lobbyID: roomID, socketID: socket.id, username, userCharacter }, (result, message) => {
 			if (result) {
+				console.log(result);
 				handleSetCredentials(username, roomID);
 				setIsAuthorized(true);
 				history.push('/lobby');

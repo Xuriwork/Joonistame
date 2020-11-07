@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 
 const GRAPH_ENDPOINT = 'https://superb-kick.us-west-2.aws.cloud.dgraph.io/graphql';
 
-const fetchGraphQL = async (query) => {
+const fetchGraphQL = async (operation) => {
   const result = await fetch(
     GRAPH_ENDPOINT,
     {
@@ -10,21 +10,21 @@ const fetchGraphQL = async (query) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query: operation })
     }
   );
   return await result.json();
 };
 
-const sendQuery = async({ operationName, query, variables }) => {
+const sendQuery = async({ operationName, query }) => {
   const { errors, data } = await fetchGraphQL(query);
 
   if (errors) console.error(errors);
   
-  console.log(data[operationName]);
+  console.log(data);
 };
 
-const sendMutation = async ({ operationName, mutation, variables }) => {
+const sendMutation = async ({ operationName, mutation }) => {
   const { errors, data } = await fetchGraphQL(mutation);
 
   if (errors) console.error(errors);
@@ -42,31 +42,9 @@ const schema = {
           roomID
           userCharacter
           points
-        }
-      }
-    `,
-    getAllUsersInRoom: (roomID) => `
-      query {
-        queryUser(filter: {roomID: {allofterms: "${roomID}"}}) {
-          roomID
-          username
-          userCharacter
-          points
           isCorrectGuess
-          id
         }
       }
-    `,
-    getUserQuery: (id) => `
-        query {
-          queryUser(filter: {id: {allofterms: "${id}"}}) {
-            id
-            username
-            roomID
-            userCharacter
-            points
-          }
-        }
     `,
     allRoomsQuery: `
       query {
@@ -80,49 +58,7 @@ const schema = {
         }
       }
     `,
-    getRoomQuery: (roomID) => `
-        query {
-          queryRoom(filter: {roomID: {allofterms: "${roomID}"}}) {
-            roomID,
-            drawer,
-            users {
-              username,
-              id
-            }
-          }
-        }
-    `,
   },
-  Mutation: {
-    addUserMutation: (args) => `
-      mutation {
-        addUser(input: [{ id: "${args.id}", username: "${args.username}", roomID: "${args.roomID}", userCharacter: "${args.userCharacter}", points: 0, isCorrectGuess: false }]) {
-          user {
-            id 
-            username 
-            roomID 
-            userCharacter 
-            points 
-            isCorrectGuess
-          }
-        }
-      }
-    `,
-    addRoomMutation: ({ roomID, drawer, maxRoomSize, word }) => `
-      mutation {
-        addRoom(input: [{ roomID: "${roomID}", drawer: "${drawer}", maxRoomSize: ${maxRoomSize}, word: "${word}" }]) {
-          room {
-            roomID,
-            drawer,
-            users {
-              id
-              username,
-            }
-          }
-        }
-      }
-    `,
-  }
 };
 
 const resolvers = {
@@ -132,36 +68,17 @@ const resolvers = {
       query,
       variables: 'id username roomID userCharacter points isCorrectGuess' 
     }),
-    getUser: async (query) => sendQuery({ 
-      operationName: 'queryUser', 
-      query, 
-      variables: 'id username roomID userCharacter points isCorrectGuess' 
-    }),
-    getLobby: async (query) => sendQuery({ 
-      name: 'queryLobby', 
-      query, 
-      variables: 'roomID drawer, maxLobbySize, users: { username, id }' 
-    }),
-    getRoom: async (query) => sendQuery({ 
-      operationName: 'queryRoom', 
-      query, 
-      variables: 'roomID drawer, maxRoomSize, word' 
-    })
   },
   Mutation: {
-    addUser: async (mutation) => sendMutation({ 
-        operationName: 'addUser', 
-        mutation,
-        variables: 'id username roomID userCharacter points isCorrectGuess'
-    }),
-    addRoom: async (mutation) => sendMutation({ 
-      operationName: 'addRoom', 
+    addUserToLobby: async (mutation) => sendMutation({ 
+      operationName: 'addUser', 
       mutation,
-      variables: 'roomID drawer maxRoomSize word'
+      variables: 'lobbyID drawer maxLobbySize'
     }),
   }
 };
 
 //resolvers.Mutation.addUser(schema.Mutation.addUserMutation({id: "Test", username: "Test", roomID: "Test", userCharacter: "Test", points: 10, isCorrectGuess: false}));
 //resolvers.Mutation.addRoom(schema.Mutation.addRoomMutation({ roomID: "Test", drawer: "Test", maxRoomSize: 20, word: null }));
-resolvers.Query.getUser(schema.Query.getAllUsersInRoom('Test'));
+//resolvers.Mutation.addRoom(schema.Mutation.addRoomMutation({ roomID: 'Test', drawer: 'Test', word: 'Test' }));
+//resolvers.Query.getUser(schema.Query.getUserQuery('Test'));

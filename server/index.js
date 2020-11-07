@@ -8,10 +8,10 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, removeUser, getAllUsersInRoom, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly } = require('./actions/userActions');
-const { addRoom, removeRoom, getRoomByRoomID } = require('./actions/roomActions');
+const { addUser, removeUser, getAllUsersInRoom, getAllUsersInLobby, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly } = require('./actions/userActions');
+const { addRoom, removeRoom, getRoom } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
-const { addLobby, addUserToLobby, removeUserFromLobby, removeLobby, getLobbyByLobbyID, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
+const { addLobby, deleteLobby, getLobby, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const createRandomRoomID = () => {
+const createRandomID = () => {
   const randomId = nanoid();
   const formatedStringId = randomId.substring(0,5) + '-' + randomId.substring(5, 10) + '-' + randomId.substring(10, 15) + '-' + randomId.substring(15, 20);
   return formatedStringId;
@@ -36,19 +36,22 @@ const createRandomRoomID = () => {
 
 io.on('connection', (socket) => {
 
-  socket.on('JOIN_LOBBY', ({ roomID, userCharacter, username }, callback) => {
-    const lobby = getLobbyByLobbyID(roomID);
+  socket.on('JOIN_LOBBY', async ({ lobbyID, userCharacter, username }, callback) => {
+    const lobby = await getLobby(lobbyID);
+    const users = await getAllUsersInLobby(lobbyID);
+    console.log(lobby);
+
     if (!lobby) return callback(false, 'No lobby with that ID exists');
-    if (lobby.users.length === 10) {
+    if (users.length === 10) {
       return callback(false, 'Sorry, this room is full ☹️')
     };
 
-    const user = checkIfNameExistsInLobby(lobby.users, username);
+    const user = checkIfNameExistsInLobby(users, username);
 
     if (!user) {
-      addUserToLobby({ id: socket.id, username, roomID, userCharacter });
-      socket.join(roomID);
-      socket.roomID = roomID;
+      addUser({ id: socket.id, username, roomID: lobbyID, userCharacter });
+      socket.join(lobbyID);
+      socket.lobbyID = lobbyID;
       callback(true);
     } else {
       callback(false, 'Name is already in use');
@@ -56,26 +59,30 @@ io.on('connection', (socket) => {
     };
   });
 
-  socket.on('CREATE_LOBBY', ({ userCharacter, username }, callback) => {
-    const roomID = createRandomRoomID();
-    const room = getRoomByRoomID(roomID);
-    if (!room) {
-      addLobby({ drawer: socket.id, roomID });
-      addUserToLobby({ id: socket.id, username, roomID, userCharacter });
-      socket.join(roomID);
-      socket.roomID = roomID;
-      callback(roomID);
+  socket.on('CREATE_LOBBY', async ({ userCharacter, username }, callback) => {
+    const lobbyID = createRandomID();
+    const lobby = await getLobby(lobbyID);
+
+    if (!lobby) {
+      addUser({ id: socket.id, username, roomID: lobbyID, userCharacter });
+      addLobby({ drawer: socket.id, lobbyID })
+      .then(() => {
+        socket.join(lobbyID);
+        socket.lobbyID = lobbyID;
+        callback(lobbyID);
+      })
+      .catch((error) => console.log(error));
     };
   });
 
-  socket.on('JOINED_LOBBY', (roomID) => {
-    const { users, drawer } = getLobbyByLobbyID(roomID);
+  socket.on('JOINED_LOBBY', async (lobbyID) => {
+    const lobby = await getLobby(lobbyID);
+    const users = await getAllUsersInLobby(lobbyID);
 
     if (users.length > 1) {
-      io.sockets.connected[drawer].emit('ABLE_TO_START', true);
+      io.sockets.connected[lobby.drawer].emit('ABLE_TO_START', true);
     };
-    
-    io.in(roomID).emit('GET_USERS', users);
+    io.in(lobbyID).emit('GET_USERS', users);
   });
 
   socket.on('START_GAME', (roomID) => {
@@ -83,8 +90,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('JOIN_GAME_ROOM', ({ username, roomID, userCharacter }) => {
-    removeLobby(roomID);
-    socket.roomID = null;
+    deleteLobby(roomID);
+    socket.lobbyID = null;
     socket.leaveAll();
 
     roomID = roomID.trim();
@@ -95,17 +102,16 @@ io.on('connection', (socket) => {
     addUser({ id: socket.id, username, roomID, userCharacter });
 
     const users = getAllUsersInRoom(roomID);
-    const room = getRoomByRoomID(roomID);
+    const room = getRoom(roomID);
     
     if (!room) {
       addRoom({ drawer: users[0].id, roomID });
       addCanvas({ roomID });
     };
 
-    const { drawer } = getRoomByRoomID(roomID);
+    const { drawer } = getRoom(roomID);
 
     socket.join(roomID);
-    socket.roomID = roomID;
     socket.roomID = roomID;
 
     io.in(roomID).emit('MESSAGE', {
@@ -128,7 +134,7 @@ io.on('connection', (socket) => {
   const emitNewRound = () => {
     const roomID = socket.roomID;
     const users = getAllUsersInRoom(roomID);
-    const room = getRoomByRoomID(roomID);
+    const room = getRoom(roomID);
 
     const indexOfCurrentDrawer = users.findIndex((user) => user.id === room.drawer);
     
@@ -145,7 +151,7 @@ io.on('connection', (socket) => {
   };
 
   socket.on('SET_WORD', (word) => {
-    const room = getRoomByRoomID(socket.roomID);
+    const room = getRoom(socket.roomID);
     room.word = word;
 
     const splitWord = word.split('');
@@ -182,12 +188,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('SEND_MESSAGE', (data) => {
-    const room = getRoomByRoomID(socket.roomID);
+    const room = getRoom(socket.roomID);
     const user = getUser(socket.id);
 
     if (data.content.toLowerCase() === room.word.toLowerCase()) {
       if (socket.id === room.drawer) return;
-      emitUserIsCorrect({ user, io, drawerUserID: room.drawer });
+      emitUserIsCorrect({ id: socket.id, io, drawerUserID: room.drawer, roomID: socket.roomID });
       
       const usersWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
       const usersInRoom = getAllUsersInRoom(socket.roomID);
@@ -196,13 +202,13 @@ io.on('connection', (socket) => {
         emitNewRound();
       };
 
-      return io.in(user.roomID).emit('MESSAGE', {
+      return io.in(socket.roomID).emit('MESSAGE', {
         type: 'SERVER-NEW_ROUND',
         content: 'New round',
       });
     };
 
-    io.in(user.roomID).emit('MESSAGE', { 
+    io.in(socket.roomID).emit('MESSAGE', { 
       username: user.username, 
       content: data.content, 
       id: socket.id 
@@ -214,28 +220,28 @@ io.on('connection', (socket) => {
     if (!socket.roomID) return;
 
     const user = removeUser(socket.id);
-    const userInLobby = removeUserFromLobby({ userID: socket.id, roomID: socket.roomID });
+    const userInLobby = removeUser({ userID: socket.id, lobbyID: socket.roomID });
 
     if (userInLobby) {
-      const lobby = getLobbyByLobbyID(socket.roomID);
+      const lobby = getLobby(socket.lobbyID);
       const userWasLobbyLeader = socket.id === lobby.drawer;
       
       if (userWasLobbyLeader && lobby.users.length > 0) {
         lobby.drawer = lobby.users[0].id;
-        io.in(socket.roomID).emit('GET_USERS', lobby.users);
+        io.in(socket.lobbyID).emit('GET_USERS', lobby.users);
       };
 
-      if (lobby.users.length === 0) removeLobby(socket.id);
+      if (lobby.users.length === 0) deleteLobby(socket.lobbyID);
 
       if (lobby.users.length === 1) {
         io.sockets.connected[lobby.drawer].emit('ABLE_TO_START', false);
       };
 
-      io.in(socket.roomID).emit('GET_USERS', lobby.users);
+      io.in(socket.lobbyID).emit('GET_USERS', lobby.users);
     };
 
     if (user) {
-      const room = getRoomByRoomID(socket.roomID);
+      const room = getRoom(socket.roomID);
 
       const userWasAdmin = socket.id === room.drawer;
       const users = getAllUsersInRoom(user.roomID);
