@@ -1,0 +1,410 @@
+#######################
+# Input Schema
+#######################
+
+type User @withSubscription {
+	id: String! @search
+	username: String!
+	roomID: String @search
+	lobbyID: String @search
+	userCharacter: String!
+	points: Int
+	isCorrectGuess: Boolean @search
+}
+
+type Room @withSubscription {
+	roomID: String! @search
+	drawer: String!
+	users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	maxRoomSize: Int!
+	word: String
+}
+
+type Lobby @withSubscription {
+	host: String!
+	hostName: String
+	lobbyID: String! @search
+	maxLobbySize: Int!
+	users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+}
+
+#######################
+# Extended Definitions
+#######################
+
+"""
+The DateTime scalar type represents date and time as a string in RFC3339 format.
+For example: "1985-04-12T23:20:50.52Z" represents 20 minutes and 50.52 seconds after the 23rd hour of April 12th, 1985 in UTC.
+"""
+scalar DateTime
+
+enum DgraphIndex {
+	int
+	float
+	bool
+	hash
+	exact
+	term
+	fulltext
+	trigram
+	regexp
+	year
+	month
+	day
+	hour
+}
+
+input AuthRule {
+	and: [AuthRule]
+	or: [AuthRule]
+	not: AuthRule
+	rule: String
+}
+
+enum HTTPMethod {
+	GET
+	POST
+	PUT
+	PATCH
+	DELETE
+}
+
+enum Mode {
+	BATCH
+	SINGLE
+}
+
+input CustomHTTP {
+	url: String!
+	method: HTTPMethod!
+	body: String
+	graphql: String
+	mode: Mode
+	forwardHeaders: [String!]
+	secretHeaders: [String!]
+	introspectionHeaders: [String!]
+	skipIntrospection: Boolean
+}
+
+directive @hasInverse(field: String!) on FIELD_DEFINITION
+directive @search(by: [DgraphIndex!]) on FIELD_DEFINITION
+directive @dgraph(type: String, pred: String) on OBJECT | INTERFACE | FIELD_DEFINITION
+directive @id on FIELD_DEFINITION
+directive @withSubscription on OBJECT | INTERFACE
+directive @secret(field: String!, pred: String) on OBJECT | INTERFACE
+directive @auth(
+	query: AuthRule,
+	add: AuthRule,
+	update: AuthRule,
+	delete:AuthRule) on OBJECT
+directive @custom(http: CustomHTTP, dql: String) on FIELD_DEFINITION
+directive @remote on OBJECT | INTERFACE
+directive @cascade on FIELD
+directive @lambda on FIELD_DEFINITION
+
+input IntFilter {
+	eq: Int
+	le: Int
+	lt: Int
+	ge: Int
+	gt: Int
+}
+
+input FloatFilter {
+	eq: Float
+	le: Float
+	lt: Float
+	ge: Float
+	gt: Float
+}
+
+input DateTimeFilter {
+	eq: DateTime
+	le: DateTime
+	lt: DateTime
+	ge: DateTime
+	gt: DateTime
+}
+
+input StringTermFilter {
+	allofterms: String
+	anyofterms: String
+}
+
+input StringRegExpFilter {
+	regexp: String
+}
+
+input StringFullTextFilter {
+	alloftext: String
+	anyoftext: String
+}
+
+input StringExactFilter {
+	eq: String
+	le: String
+	lt: String
+	ge: String
+	gt: String
+}
+
+input StringHashFilter {
+	eq: String
+}
+
+#######################
+# Generated Types
+#######################
+
+type AddLobbyPayload {
+	lobby(filter: LobbyFilter, order: LobbyOrder, first: Int, offset: Int): [Lobby]
+	numUids: Int
+}
+
+type AddRoomPayload {
+	room(filter: RoomFilter, order: RoomOrder, first: Int, offset: Int): [Room]
+	numUids: Int
+}
+
+type AddUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	numUids: Int
+}
+
+type DeleteLobbyPayload {
+	lobby(filter: LobbyFilter, order: LobbyOrder, first: Int, offset: Int): [Lobby]
+	msg: String
+	numUids: Int
+}
+
+type DeleteRoomPayload {
+	room(filter: RoomFilter, order: RoomOrder, first: Int, offset: Int): [Room]
+	msg: String
+	numUids: Int
+}
+
+type DeleteUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	msg: String
+	numUids: Int
+}
+
+type UpdateLobbyPayload {
+	lobby(filter: LobbyFilter, order: LobbyOrder, first: Int, offset: Int): [Lobby]
+	numUids: Int
+}
+
+type UpdateRoomPayload {
+	room(filter: RoomFilter, order: RoomOrder, first: Int, offset: Int): [Room]
+	numUids: Int
+}
+
+type UpdateUserPayload {
+	user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	numUids: Int
+}
+
+#######################
+# Generated Enums
+#######################
+
+enum LobbyOrderable {
+	host
+	hostName
+	lobbyID
+	maxLobbySize
+}
+
+enum RoomOrderable {
+	roomID
+	drawer
+	maxRoomSize
+	word
+}
+
+enum UserOrderable {
+	id
+	username
+	roomID
+	lobbyID
+	userCharacter
+	points
+}
+
+#######################
+# Generated Inputs
+#######################
+
+input AddLobbyInput {
+	host: String!
+	hostName: String
+	lobbyID: String!
+	maxLobbySize: Int!
+	users: [UserRef]
+}
+
+input AddRoomInput {
+	roomID: String!
+	drawer: String!
+	users: [UserRef]
+	maxRoomSize: Int!
+	word: String
+}
+
+input AddUserInput {
+	id: String!
+	username: String!
+	roomID: String
+	lobbyID: String
+	userCharacter: String!
+	points: Int
+	isCorrectGuess: Boolean
+}
+
+input LobbyFilter {
+	lobbyID: StringTermFilter
+	and: LobbyFilter
+	or: LobbyFilter
+	not: LobbyFilter
+}
+
+input LobbyOrder {
+	asc: LobbyOrderable
+	desc: LobbyOrderable
+	then: LobbyOrder
+}
+
+input LobbyPatch {
+	host: String
+	hostName: String
+	lobbyID: String
+	maxLobbySize: Int
+	users: [UserRef]
+}
+
+input LobbyRef {
+	host: String
+	hostName: String
+	lobbyID: String
+	maxLobbySize: Int
+	users: [UserRef]
+}
+
+input RoomFilter {
+	roomID: StringTermFilter
+	and: RoomFilter
+	or: RoomFilter
+	not: RoomFilter
+}
+
+input RoomOrder {
+	asc: RoomOrderable
+	desc: RoomOrderable
+	then: RoomOrder
+}
+
+input RoomPatch {
+	roomID: String
+	drawer: String
+	users: [UserRef]
+	maxRoomSize: Int
+	word: String
+}
+
+input RoomRef {
+	roomID: String
+	drawer: String
+	users: [UserRef]
+	maxRoomSize: Int
+	word: String
+}
+
+input UpdateLobbyInput {
+	filter: LobbyFilter!
+	set: LobbyPatch
+	remove: LobbyPatch
+}
+
+input UpdateRoomInput {
+	filter: RoomFilter!
+	set: RoomPatch
+	remove: RoomPatch
+}
+
+input UpdateUserInput {
+	filter: UserFilter!
+	set: UserPatch
+	remove: UserPatch
+}
+
+input UserFilter {
+	id: StringTermFilter
+	roomID: StringTermFilter
+	lobbyID: StringTermFilter
+	isCorrectGuess: Boolean
+	and: UserFilter
+	or: UserFilter
+	not: UserFilter
+}
+
+input UserOrder {
+	asc: UserOrderable
+	desc: UserOrderable
+	then: UserOrder
+}
+
+input UserPatch {
+	id: String
+	username: String
+	roomID: String
+	lobbyID: String
+	userCharacter: String
+	points: Int
+	isCorrectGuess: Boolean
+}
+
+input UserRef {
+	id: String
+	username: String
+	roomID: String
+	lobbyID: String
+	userCharacter: String
+	points: Int
+	isCorrectGuess: Boolean
+}
+
+#######################
+# Generated Query
+#######################
+
+type Query {
+	queryUser(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	queryRoom(filter: RoomFilter, order: RoomOrder, first: Int, offset: Int): [Room]
+	queryLobby(filter: LobbyFilter, order: LobbyOrder, first: Int, offset: Int): [Lobby]
+}
+
+#######################
+# Generated Mutations
+#######################
+
+type Mutation {
+	addUser(input: [AddUserInput!]!): AddUserPayload
+	updateUser(input: UpdateUserInput!): UpdateUserPayload
+	deleteUser(filter: UserFilter!): DeleteUserPayload
+	addRoom(input: [AddRoomInput!]!): AddRoomPayload
+	updateRoom(input: UpdateRoomInput!): UpdateRoomPayload
+	deleteRoom(filter: RoomFilter!): DeleteRoomPayload
+	addLobby(input: [AddLobbyInput!]!): AddLobbyPayload
+	updateLobby(input: UpdateLobbyInput!): UpdateLobbyPayload
+	deleteLobby(filter: LobbyFilter!): DeleteLobbyPayload
+}
+
+#######################
+# Generated Subscriptions
+#######################
+
+type Subscription {
+	queryUser(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+	queryRoom(filter: RoomFilter, order: RoomOrder, first: Int, offset: Int): [Room]
+	queryLobby(filter: LobbyFilter, order: LobbyOrder, first: Int, offset: Int): [Lobby]
+}

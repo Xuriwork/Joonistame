@@ -9,9 +9,9 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
 const { addUser, deleteUser, getAllUsersInRoom, getAllUsersInLobby, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly } = require('./actions/userActions');
-const { addRoom, removeRoom, getRoom } = require('./actions/roomActions');
+const { addRoom, removeRoom, getRoom, setNewDrawer, setNewWord } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
-const { addLobby, deleteLobby, getLobby, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
+const { addLobby, addUserToLobby, removeUserToLobby, deleteLobby, getLobby, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
 
 const PORT = process.env.PORT || 5000;
 
@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
     const lobby = await getLobby(lobbyID);
     const users = await getAllUsersInLobby(lobbyID);
 
-    if (!lobby) return callback(false, 'No lobby with that ID exists');
+    if (!lobby[0]) return callback(false, 'No lobby with that ID exists');
     if (users.length === 10) {
       return callback(false, 'Sorry, this room is full ☹️')
     };
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
     const user = checkIfNameExistsInLobby(users, username);
 
     if (!user) {
-      addUser({ id: socket.id, username, roomID: lobbyID, userCharacter });
+      addUserToLobby({ lobbyID, user: { id: socket.id, username, userCharacter } });
       socket.join(lobbyID);
       socket.lobbyID = lobbyID;
       callback(true);
@@ -60,15 +60,19 @@ io.on('connection', (socket) => {
 
   socket.on('CREATE_LOBBY', async ({ userCharacter, username }, callback) => {
     const lobbyID = createRandomID();
-    const lobby = await getLobby(lobbyID)[0];
+    const lobby = await getLobby(lobbyID);
 
-    if (!lobby) {
-      addUser({ id: socket.id, username, roomID: lobbyID, userCharacter });
-      addLobby({ host: socket.id, hostName: username, lobbyID })
+    if (!lobby[0]) {
+      await addLobby({ host: socket.id, hostName: username, lobbyID })
       .then(() => {
         socket.join(lobbyID);
         socket.lobbyID = lobbyID;
         callback(lobbyID);
+        console.log(lobbyID);
+        addUserToLobby({ lobbyID, user: { id: socket.id, username, userCharacter } })
+        .then((res) => {
+          console.log('res', res);
+        })
       })
       .catch((error) => console.log(error));
     };
@@ -76,12 +80,15 @@ io.on('connection', (socket) => {
 
   socket.on('JOINED_LOBBY', async (lobbyID) => {
     const lobby = await getLobby(lobbyID);
-    const users = await getAllUsersInLobby(lobbyID);
+    
+    console.log(lobby[0].users.length);
+    console.log(lobby[0].host);
 
-    if (users.length > 1) {
+    if (lobby[0] && lobby[0].users.length > 1) {
+      
       io.sockets.connected[lobby[0].host].emit('ABLE_TO_START', true);
     };
-    io.in(lobbyID).emit('GET_USERS', users);
+    io.in(lobbyID).emit('GET_USERS', lobby[0].users);
   });
 
   socket.on('START_GAME', (roomID) => {
@@ -89,73 +96,80 @@ io.on('connection', (socket) => {
   });
 
   socket.on('JOIN_GAME_ROOM', async ({ username, roomID, userCharacter }) => {
-    console.log(roomID);
-    const lobby = await deleteLobby(roomID);
-    console.log('hostName', lobby);
-    socket.lobbyID = null;
-    socket.leaveAll();
+    //const lobby = await deleteLobby(roomID);
+    const lobby = await getLobby(roomID);
 
-    roomID = roomID.trim();
-    username = username.trim();
+    if (lobby[0]) {
+      socket.lobbyID = null;
+      socket.leaveAll();
 
-    if (!roomID || !username) return;
+      roomID = roomID.trim();
+      username = username.trim();
 
-    addUser({ id: socket.id, username, roomID, userCharacter });
+      if (!roomID || !username) return;
 
-    const users = getAllUsersInRoom(roomID);
-    const room = getRoom(roomID);
+      const user = await getUser(socket.id);
+      if (!user) {
+        await addUser({ id: socket.id, username, roomID, userCharacter });
+      };
 
-    console.log('users', users);
-    
-    if (!room) {
-      addRoom({ drawer: users[0].id, roomID });
-      addCanvas({ roomID });
+      const users = await getAllUsersInRoom(roomID);
+      
+      const drawer = users.find((user) => user.username === lobby[0].hostName).id;
+      
+      const room = await getRoom(roomID);
+      
+      if (!room[0]) {
+        await addRoom({ drawer, roomID });
+        addCanvas({ roomID });
+      };
+      
+      socket.join(roomID);
+      socket.roomID = roomID;
+  
+      io.in(roomID).emit('MESSAGE', {
+        type: 'SERVER-USER_JOINED',
+        content: `${username} joined the room. 👋`
+      });
+      
+      socket.to(roomID).emit('NEW_USER_JOINED');
+  
+      const canvas = getCanvasByRoomID(socket.roomID);
+      
+      if (canvas !== undefined) {
+        socket.emit('GET_CANVAS', canvas.data);
+      };
+      
+      socket.emit('SET_DRAWER', drawer);
+      io.in(roomID).emit('GET_USERS', users);
     };
-
-    const { drawer } = getRoom(roomID);
-
-    socket.join(roomID);
-    socket.roomID = roomID;
-
-    io.in(roomID).emit('MESSAGE', {
-      type: 'SERVER-USER_JOINED',
-      content: `${username} joined the room. 👋`
-    });
-    
-    socket.to(roomID).emit('NEW_USER_JOINED');
-
-    const canvas = getCanvasByRoomID(socket.roomID);
-    
-    if (canvas !== undefined) {
-      socket.emit('GET_CANVAS', canvas.data);
-    };
-    
-    socket.emit('SET_DRAWER', drawer);
-    io.in(roomID).emit('GET_USERS', users);
   });
 
-  const emitNewRound = () => {
+  const emitNewRound = async () => {
     const roomID = socket.roomID;
-    const users = getAllUsersInRoom(roomID);
-    const room = getRoom(roomID);
+    const users = await getAllUsersInRoom(roomID);
+    const room = await getRoom(roomID);
 
-    const indexOfCurrentDrawer = users.findIndex((user) => user.id === room.drawer);
+    const indexOfCurrentDrawer = users.findIndex((user) => user.id === room[0].drawer);
     
     const newDrawer = users[indexOfCurrentDrawer + 1] ? users[indexOfCurrentDrawer + 1] : users[0];
-    room.drawer = newDrawer.id;
+
+    await setNewDrawer({ roomID: newDrawer.id, drawer: newDrawer });
     
-    const usersInRoomWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(roomID);
+    const usersInRoomWhoGuessedCorrectly = await getAllUsersInRoomWhoGuessedCorrectly(roomID);
     usersInRoomWhoGuessedCorrectly.forEach((user) => user.isCorrectGuess = false);
     
-    clearInterval(room.countdownTimer);
+    clearInterval(room[0].countdownTimer);
     io.in(roomID).emit('SET_DRAWER', newDrawer.id);
     io.in(socket.roomID).emit('NEW_ROUND');
     io.in(roomID).emit('GET_USERS', users);
+    io.in(roomID).emit('CLEAR_CANVAS');
+    clearCanvas(socket.roomID);
   };
 
-  socket.on('SET_WORD', (word) => {
-    const room = getRoom(socket.roomID);
-    room.word = word;
+  socket.on('SET_WORD', async (word) => {
+    const room = await getRoom(socket.roomID);
+    await setNewWord({ roomID: socket.roomID, word });
 
     const splitWord = word.split('');
 
@@ -190,13 +204,13 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('CLEAR_CANVAS');
   });
 
-  socket.on('SEND_MESSAGE', (data) => {
-    const room = getRoom(socket.roomID);
-    const user = getUser(socket.id);
+  socket.on('SEND_MESSAGE', async (data) => {
+    const room = await getRoom(socket.roomID);
+    const user = await getUser(socket.id);
 
-    if (data.content.toLowerCase() === room.word.toLowerCase()) {
-      if (socket.id === room.drawer) return;
-      emitUserIsCorrect({ id: socket.id, io, drawerUserID: room.drawer, roomID: socket.roomID });
+    if (data.content.toLowerCase() === room[0].word.toLowerCase()) {
+      if (socket.id === room[0].drawer) return;
+      emitUserIsCorrect({ id: socket.id, io, drawerUserID: room[0].drawer, roomID: socket.roomID });
       
       const usersWhoGuessedCorrectly = getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
       const usersInRoom = getAllUsersInRoom(socket.roomID);
@@ -221,18 +235,20 @@ io.on('connection', (socket) => {
   socket.on('disconnect', async () => {
 
     const user = await deleteUser(socket.id);
-
+    
     if (socket.lobbyID) {
       const lobby = await getLobby(socket.lobbyID);
-      const users = await getAllUsersInLobby(socket.lobbyID);
       const userWasLobbyHost = socket.id === lobby.host;
+      const users = lobby[0].users;
+      
+      await removeUserToLobby({ lobbyID: socket.lobbyID, user: { id: socket.id, username: user.username, userCharacter: user.userCharacter } });
       
       if (userWasLobbyHost && users.length > 0) {
         lobby.host = users[0].id;
         io.in(socket.lobbyID).emit('GET_USERS', users);
       };
 
-      if (users.length === 0) deleteLobby(socket.lobbyID);
+      if (users.length === 0) await deleteLobby(socket.lobbyID);
 
       if (users.length === 1) {
         io.sockets.connected[lobby[0].host].emit('ABLE_TO_START', false);
@@ -242,14 +258,15 @@ io.on('connection', (socket) => {
     };
 
     if (socket.roomID) {
-      const room = getRoom(socket.roomID);
+      const room = await getRoom(socket.roomID);
+      const drawer = room[0].drawer;
       const users = getAllUsersInRoom(user.roomID);
-      const userWasAdmin = socket.id === room.drawer;
+      const userWasAdmin = socket.id === drawer;
 
       if (userWasAdmin && users.length > 0) {
-        room.drawer = users[0].id;
+        setNewDrawer({ room: room[0].roomID, drawer: users[0].id });
 
-        io.in(user.roomID).emit('SET_DRAWER', room.drawer);
+        io.in(user.roomID).emit('SET_DRAWER', drawer);
         io.in(user.roomID).emit('MESSAGE', {
           type: 'NEW_DRAWER',
           content: `${users[0].username} is now the drawer. ✏️`,

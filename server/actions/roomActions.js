@@ -40,7 +40,35 @@ const getRoom = async (roomID) => sendQuery({
         }
     `, 
     variables: 'roomID drawer, maxRoomSize, word' 
-})[0];
+});
+
+const setNewDrawer = async ({ roomID, drawer }) => sendMutation({
+    operationName: 'updateRoom',
+    mutation: `
+        mutation {
+            updateRoom(input: {filter: {roomID: {allofterms: "${roomID}"} }, set: {drawer: "${drawer}" } }) {
+                room {
+                    drawer,
+                }
+            }
+        }
+    `,
+    variables: 'roomID',
+});
+
+const setNewWord = async ({ roomID, word }) => sendMutation({
+    operationName: 'updateRoom',
+    mutation: `
+        mutation {
+            updateRoom(input: {filter: {roomID: {allofterms: "${roomID}"} }, set: {word: "${word}" } }) {
+                room {
+                    word,
+                }
+            }
+        }
+    `,
+    variables: 'roomID',
+});
 
 // const addRoom = ({ drawer, roomID }) => {
 // 	const room = {
@@ -56,4 +84,4 @@ const getRoom = async (roomID) => sendQuery({
 // };
 
 
-module.exports = { addRoom, deleteRoom, getRoom };
+module.exports = { addRoom, deleteRoom, getRoom, setNewDrawer, setNewWord };

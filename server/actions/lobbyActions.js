@@ -8,6 +8,7 @@ const getLobby = async (lobbyID) =>
                 queryLobby(filter: {lobbyID: {allofterms: "${lobbyID}"}}) {
                     lobbyID,
                     host,
+                    hostName,
                     users {
                         id,
                         username,
@@ -28,6 +29,7 @@ const addLobby = async ({ lobbyID, host, hostName }) =>
                     lobby {
                         lobbyID,
                         host,
+                        hostName,
                         users {
                             id,
                             username,
@@ -46,10 +48,10 @@ const deleteLobby = async (lobbyID) =>
 		mutation: `
             mutation {
                 deleteLobby(filter: {lobbyID: {allofterms: "${lobbyID}"}}) {
-                    host,
-                    hostName,
                     lobby {
-                        lobbyID
+                        lobbyID,
+                        host,
+                        hostName,
                     }
                 }
             }
@@ -61,21 +63,41 @@ const addUserToLobby = async ({ lobbyID, user }) => sendMutation({
     operationName: 'updateLobby',
     mutation: `
         mutation {
-            updateLobby(input: {filter: {lobbyID: { allofterms: "${lobbyID}" }}, set: {users: {id: "${user.id}", username: "${user.username}" , userCharacter: "${user.userCharacter}" }}}) {
+            updateLobby(input: {filter: {lobbyID: {allofterms: "${lobbyID}"}}, set: {users: [{id: "${user.id}", username: "${user.username}", userCharacter: "${user.userCharacter}"}]}}) {
                 lobby {
                     lobbyID
                     maxLobbySize
                     users {
-                        id,
-                        username,
-                        userCharacter,
+                        id
+                        username
+                        userCharacter
                     }
                 }
             }
         }
     `,
     variables: 'lobbyID',
-})
+});
+
+const removeUserToLobby = async ({ lobbyID, user }) => sendMutation({
+    operationName: 'updateLobby',
+    mutation: `
+        mutation {
+            updateLobby(input: {filter: {lobbyID: {allofterms: "${lobbyID}"}}, remove: {users: [{id: "${user.id}", username: "${user.username}", userCharacter: "${user.userCharacter}"}]}}) {
+                lobby {
+                    lobbyID
+                    maxLobbySize
+                    users {
+                        id
+                        username
+                        userCharacter
+                    }
+                }
+            }
+        }
+    `,
+    variables: 'lobbyID',
+});
 
 // const addUserToLobby = (user) => {
 // 	const lobby = getLobby(user.roomID);
@@ -93,5 +115,6 @@ module.exports = {
 	getLobby,
 	deleteLobby,
     checkIfNameExistsInLobby,
-    addUserToLobby
+    addUserToLobby,
+    removeUserToLobby,
 };

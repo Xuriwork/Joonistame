@@ -12,7 +12,7 @@ const buttons = [
     { name: 'Paint Bucket', icon: PaintBucketIcon },
 ];
 
-const DrawerTools = ({ tool, handleChangeTool, handleOnChangePencilSize, handleChangeColor, pencilSize, handleClearCanvas }) => {
+const DrawerTools = ({ tool, handleChangeTool, handleOnChangePencilSize, handleChangeColor, pencilSize, handleClearCanvas, pencilColor }) => {
 
     return (
 			<div className='drawer-tools-container'>
@@ -33,7 +33,7 @@ const DrawerTools = ({ tool, handleChangeTool, handleOnChangePencilSize, handleC
 					handleOnChangePencilSize={handleOnChangePencilSize}
                     tool={tool}
 				/>
-				<ColorPalette handleChangeColor={handleChangeColor} />
+				<ColorPalette handleChangeColor={handleChangeColor} pencilColor={pencilColor} />
 			</div>
 		);
 }

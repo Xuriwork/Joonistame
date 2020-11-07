@@ -77,9 +77,7 @@ class GameRoom extends Component{
 
         socket.on('SET_DRAWER', (drawer) => this.setState({ drawer }));
 
-        socket.on('SET_WORD', (word) => {
-            this.setState({ word, isTimerActive: true });
-        });
+        socket.on('SET_WORD', (word) => this.setState({ word, isTimerActive: true }));
 
         socket.on('NEW_ROUND', () => {
             this.setState({ isTimerActive: false, word: null, duration: 90000, time: 0 });
