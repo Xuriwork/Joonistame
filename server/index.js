@@ -160,7 +160,7 @@ io.on('connection', (socket) => {
   };
 
   socket.on('SET_WORD', async (word) => {
-    const room = await getRoom(socket.roomID);
+    //const room = await getRoom(socket.roomID);
     await setNewWord({ roomID: socket.roomID, word });
 
     const splitWord = word.split('');
@@ -170,15 +170,16 @@ io.on('connection', (socket) => {
 
     socket.emit('SET_WORD', word);
     socket.to(socket.roomID).emit('SET_WORD', hiddenWord);
+    emitNewRound();
 
-    let countdown = 90;
-    room.countdownTimer = setInterval(() => {
-      countdown--;
-      if (countdown === 0) {
-        clearInterval(room.countdownTimer);
-        emitNewRound();
-      };
-    }, 1000);
+    // let countdown = 90;
+    // room.countdownTimer = setInterval(() => {
+    //   countdown--;
+    //   if (countdown === 0) {
+    //     clearInterval(room.countdownTimer);
+    //     emitNewRound();
+    //   };
+    // }, 1000);
   });
 
   socket.on('RESIZED', () => {
@@ -214,12 +215,12 @@ io.on('connection', (socket) => {
 
         if (usersInRoom.length - 1 === usersWhoGuessedCorrectly.length) {
           emitNewRound();
+          return io.in(socket.roomID).emit('MESSAGE', {
+            type: 'SERVER-NEW_ROUND',
+            content: 'New round',
+          });
         };
 
-        return io.in(socket.roomID).emit('MESSAGE', {
-          type: 'SERVER-NEW_ROUND',
-          content: 'New round',
-        });
       };
   
       if (user[0]) {
