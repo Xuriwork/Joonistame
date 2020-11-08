@@ -8,7 +8,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-const { addUser, deleteUser, getAllUsersInRoom, getAllUsersInLobby, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly, updateUserWasCorrect } = require('./actions/userActions');
+const { addUser, deleteUser, getAllUsersInRoom, getAllUsersInLobby, getUser, emitUserIsCorrect, getAllUsersInRoomWhoGuessedCorrectly, resetIsCorrectGuessStatus } = require('./actions/userActions');
 const { addRoom, removeRoom, getRoom, setNewDrawer, setNewWord } = require('./actions/roomActions');
 const { addCanvas, updateCanvas, getCanvasByRoomID, clearCanvas, removeCanvas } = require('./actions/canvasActions');
 const { addLobby, addUserToLobby, removeUserFromLobby, deleteLobby, getLobby, checkIfNameExistsInLobby } = require('./actions/lobbyActions');
@@ -145,16 +145,10 @@ io.on('connection', (socket) => {
     const room = await getRoom(roomID);
 
     const indexOfCurrentDrawer = users.findIndex((user) => user.id === room[0].drawer);
-    
     const newDrawer = users[indexOfCurrentDrawer + 1] ? users[indexOfCurrentDrawer + 1] : users[0];
 
     await setNewDrawer({ roomID: newDrawer.id, drawer: newDrawer });
-    
-    const usersInRoomWhoGuessedCorrectly = await getAllUsersInRoomWhoGuessedCorrectly(roomID);
-    usersInRoomWhoGuessedCorrectly.forEach((user) => {
-      user.isCorrectGuess = false
-      return updateUserWasCorrect({ id: user.id, isCorrectGuess: false });
-    });
+    await resetIsCorrectGuessStatus(roomID);
     
     clearInterval(room[0].countdownTimer);
     io.in(roomID).emit('SET_DRAWER', newDrawer.id);
@@ -215,7 +209,7 @@ io.on('connection', (socket) => {
         const usersWhoGuessedCorrectly = await getAllUsersInRoomWhoGuessedCorrectly(socket.roomID);
         const usersInRoom = await getAllUsersInRoom(socket.roomID);
 
-        console.log(usersWhoGuessedCorrectly.length, usersInRoom.length)
+        console.log(usersInRoom.length - 1, usersWhoGuessedCorrectly.length)
 
         if (usersInRoom.length - 1 === usersWhoGuessedCorrectly.length) {
           emitNewRound();

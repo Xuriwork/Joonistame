@@ -52,6 +52,22 @@ const updateUserWasCorrect = async ({ id, points }) => sendMutation({
     variables: 'id username roomID userCharacter points isCorrectGuess',
 });
 
+const resetIsCorrectGuessForUsers = async (id) => sendMutation({
+    operationName: 'updateUser',
+    mutation: `
+        mutation {
+            updateUser(input: {filter: {id: {allofterms: "${id}"}}, set: {isCorrectGuess: false}}) {
+                user {
+                    username
+                    points
+                    id
+                }
+            }
+        }
+    `,
+    variables: 'id username roomID userCharacter points isCorrectGuess',
+});
+
 const updateDrawer = async ({ id, points }) => sendMutation({
     operationName: 'updateUser',
     mutation: `
@@ -160,6 +176,14 @@ const emitUserIsCorrect = async ({ userID, drawerUserID, io, roomID }) => {
 
 };
 
+const resetIsCorrectGuessStatus = async (roomID) => {
+    const usersInRoomWhoGuessedCorrectly = await getAllUsersInRoomWhoGuessedCorrectly(roomID);
+    await usersInRoomWhoGuessedCorrectly.forEach((user) => {
+      user.isCorrectGuess = false
+      resetIsCorrectGuessForUsers(user.id);
+    });
+};
+
 module.exports = {
 	addUser,
 	deleteUser,
@@ -170,4 +194,5 @@ module.exports = {
 	getAllUsersInRoomWhoGuessedCorrectly,
     emitUserIsCorrect,
     updateUserWasCorrect,
+    resetIsCorrectGuessStatus
 };
