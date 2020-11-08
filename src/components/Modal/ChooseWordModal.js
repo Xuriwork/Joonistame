@@ -4,7 +4,7 @@ import { generateRandomNoun } from '../../utils/chooseRandomWord';
 const ChooseWordModal = ({ handleChooseWord }) => {
     const [words, setWords] = useState([]);
 
-    useEffect(() => setWords(['banana', 'ball', 'grass']), [setWords]);
+    useEffect(() => setWords(generateRandomNoun()), [setWords]);
     
     return (
         <div className='modal-overlay'>
