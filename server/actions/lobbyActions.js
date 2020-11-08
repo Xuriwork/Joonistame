@@ -79,7 +79,7 @@ const addUserToLobby = async ({ lobbyID, user }) => sendMutation({
     variables: 'lobbyID',
 });
 
-const removeUserToLobby = async ({ lobbyID, user }) => sendMutation({
+const removeUserFromLobby = async ({ lobbyID, user }) => sendMutation({
     operationName: 'updateLobby',
     mutation: `
         mutation {
@@ -105,7 +105,8 @@ const removeUserToLobby = async ({ lobbyID, user }) => sendMutation({
 // };
 
 const checkIfNameExistsInLobby = (users, username) => {
-	const user = users.filter((user) => user.username === username)[0];
+    const user = users.filter((user) => user.username === username)[0];
+    console.log(user);
 	if (user) return true;
 	else return false;
 };
@@ -116,5 +117,5 @@ module.exports = {
 	deleteLobby,
     checkIfNameExistsInLobby,
     addUserToLobby,
-    removeUserToLobby,
+    removeUserFromLobby,
 };

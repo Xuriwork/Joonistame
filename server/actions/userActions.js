@@ -36,11 +36,27 @@ const deleteUser = async (id) =>
 		variables: 'id username roomID',
 	});
 
-const updateUser = async ({ id, points }) => sendMutation({
+const updateUserWasCorrect = async ({ id, points }) => sendMutation({
     operationName: 'updateUser',
     mutation: `
         mutation {
-            updateUser(input: {filter: {id: {allofterms: "${id}"}}, set: {isCorrectGuess: true, points: "${points}"}}) {
+            updateUser(input: {filter: {id: {allofterms: "${id}"}}, set: {isCorrectGuess: true, points: ${points}}}) {
+                user {
+                    username
+                    points
+                    id
+                }
+            }
+        }
+    `,
+    variables: 'id username roomID userCharacter points isCorrectGuess',
+});
+
+const updateDrawer = async ({ id, points }) => sendMutation({
+    operationName: 'updateUser',
+    mutation: `
+        mutation {
+            updateUser(input: {filter: {id: {allofterms: "${id}"}}, set: {points: ${points}}}) {
                 user {
                     username
                     points
@@ -57,17 +73,17 @@ const getUser = async (id) => sendQuery({
     query: `
         query {
             queryUser(filter: {id: {allofterms: "${id}"}}) {
-                    id
-                    username
-                    roomID
-                    userCharacter
-                    points
-                    isCorrectGuess
+                id
+                username
+                roomID
+                userCharacter
+                points
+                isCorrectGuess
             }
         }
     `, 
     variables: 'id username roomID userCharacter points isCorrectGuess' 
-  })[0];
+  });
   
 const getAllUsersInRoom = async (roomID) => sendQuery({ 
     operationName: 'queryUser', 
@@ -120,26 +136,28 @@ const getAllUsersInRoom = async (roomID) => sendQuery({
     variables: 'id username roomID userCharacter points isCorrectGuess' 
   });
 
-const checkIfNameExistsInRoom = (roomID, username) => {
-	const room = getAllUsersInRoom(roomID);
+const checkIfNameExistsInRoom = async (roomID, username) => {
+	const room = await getAllUsersInRoom(roomID);
 	const user = room.filter((user) => user.username === username)[0];
 	return user;
 };
 
 const emitUserIsCorrect = async ({ userID, drawerUserID, io, roomID }) => {
 
-    const usersInRoom = getAllUsersInRoom(roomID);
-    const drawer = getUser(drawerUserID);
+    const usersInRoom = await getAllUsersInRoom(roomID);
+    const drawer = await getUser(drawerUserID);
     const user = await getUser(userID);
     
-    await updateUser({ id: userID, points: user.points + 3 });
-    await updateUser({ id: drawerUserID, points: drawer.points + 1 });
+    if (user[0] && drawer[0]) {
+        await updateUserWasCorrect({ id: userID, points: user[0].points + 3 });
+        await updateDrawer({ id: drawerUserID, points: drawer[0].points + 1 });
+        io.in(roomID).emit('GET_USERS', usersInRoom);
+        io.in(roomID).emit('MESSAGE', {
+            type: 'SERVER-GUESSED_CORRECT_WORD',
+            content: `${user[0].username} guessed the word! 👏`,
+        });
+    };
 
-	io.in(roomID).emit('GET_USERS', usersInRoom);
-	io.in(roomID).emit('MESSAGE', {
-		type: 'SERVER-GUESSED_CORRECT_WORD',
-		content: `${user.username} guessed the word! 👏`,
-	});
 };
 
 module.exports = {
@@ -150,5 +168,6 @@ module.exports = {
     getAllUsersInRoom,
     getAllUsersInLobby,
 	getAllUsersInRoomWhoGuessedCorrectly,
-	emitUserIsCorrect,
+    emitUserIsCorrect,
+    updateUserWasCorrect,
 };

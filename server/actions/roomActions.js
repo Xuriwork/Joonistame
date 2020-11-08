@@ -36,6 +36,8 @@ const getRoom = async (roomID) => sendQuery({
             queryRoom(filter: {roomID: {allofterms: "${roomID}"}}) {
                 roomID,
                 drawer,
+                word,
+                maxRoomSize
             }
         }
     `, 
