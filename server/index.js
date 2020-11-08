@@ -150,12 +150,13 @@ io.on('connection', (socket) => {
     await setNewDrawer({ roomID: newDrawer.id, drawer: newDrawer });
     await resetIsCorrectGuessStatus(roomID);
     
-    clearInterval(room[0].countdownTimer);
+    //clearInterval(room[0].countdownTimer);
     io.in(roomID).emit('SET_DRAWER', newDrawer.id);
     io.in(socket.roomID).emit('NEW_ROUND');
     io.in(roomID).emit('GET_USERS', users);
     io.in(roomID).emit('CLEAR_CANVAS');
     clearCanvas(socket.roomID);
+    console.log('New Round')
   };
 
   socket.on('SET_WORD', async (word) => {

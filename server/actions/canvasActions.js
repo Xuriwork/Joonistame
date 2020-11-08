@@ -17,8 +17,8 @@ const updateCanvas = (roomID, data) => {
 const getCanvasByRoomID = (roomID) => canvases.filter((canvas) => canvas.roomID === roomID)[0];
 
 const clearCanvas = (roomID) => {
-    let canvas = getCanvasByRoomID(roomID);
-    canvas = [];
+    const canvas = getCanvasByRoomID(roomID);
+    canvas.data = [];
     return canvas;
 };
 
