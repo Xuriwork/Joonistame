@@ -151,10 +151,10 @@ io.on('connection', (socket) => {
     await resetIsCorrectGuessStatus(roomID);
     
     //clearInterval(room[0].countdownTimer);
-    io.in(roomID).emit('SET_DRAWER', newDrawer.id);
-    io.in(socket.roomID).emit('NEW_ROUND');
-    io.in(roomID).emit('GET_USERS', users);
     io.in(roomID).emit('CLEAR_CANVAS');
+    io.in(socket.roomID).emit('NEW_ROUND');
+    io.in(roomID).emit('SET_DRAWER', newDrawer.id);
+    io.in(roomID).emit('GET_USERS', users);
     clearCanvas(socket.roomID);
     console.log('New Round')
   };
