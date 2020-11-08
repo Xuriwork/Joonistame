@@ -25,18 +25,23 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 ## Screenshots
 
 ### Join Page
-![Joonistame Join Page](./readme_images/Joonistame-join_page.png)
+![Joonistame Join Page](./readme_assets/Joonistame-join_page.png)
 
 ### Lobby Page
-![Joonistame Join Page](./readme_images/Joonistame-lobby_page.png)
+![Joonistame Join Page](./readme_assets/Joonistame-lobby_page.png)
 
 ### Game Room Page (Drawer View)
-![Joonistame Join Page](./readme_images/Joonistame-game_room_page_drawerview.png)
+![Joonistame Join Page](./readme_assets/Joonistame-game_room_page_drawerview.png)
 
 ### Game Room Page (Guesser View)
-![Joonistame Join Page](./readme_images/Joonistame-game_room_page_guesser_view.png)
+![Joonistame Join Page](./readme_assets/Joonistame-game_room_page_guesser_view.png)
 
 ## Todo List
 * [ ]  Fix input pencilWidth
 * [ ]  Make the game responsive
 * [ ]  Finish implementing Dgraph
+* [ ]  Bugs with game state
+* [ ]  Messy server side code
+
+### Demo (BETA)
+![Demo](./readme_assets/DemoVideo.gif)

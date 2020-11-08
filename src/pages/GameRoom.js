@@ -94,8 +94,10 @@ class GameRoom extends Component{
         });
 
         socket.on('CLEAR_CANVAS', () => {
+            console.log('No context');
             if (!context) return;
             context.clearRect(0, 0, width, height);
+            console.log('Context');
         });
 
         socket.on('MESSAGE', (data) => this.setMessages(data));
